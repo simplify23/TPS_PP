@@ -72,8 +72,11 @@ class TransformerEncoder(BaseModule):
         feature = feature.transpose(0, 1)  # (h*w, n, c)
         for m in self.transformer:
             feature = m(feature)
-        feature = feature.permute(1,0,2)
-        # feature = feature.permute(1, 2, 0)
-        # print(feature.shape)
-        logits = self.cls(feature)
-        return logits,feature
+        # trans test
+        # feature = feature.permute(1,0,2)
+        # logits = self.cls(feature)
+        # return logits, feature
+
+        # abinet test
+        feature = feature.permute(1, 2, 0).view(n, c, h, w)
+        return feature

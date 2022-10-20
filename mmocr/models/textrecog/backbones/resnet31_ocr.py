@@ -111,17 +111,24 @@ class ResNet31OCR(BaseModule):
 
         return Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x, tpsnet=None,test=False):
 
+        outs = []
+        logits = None
         x = self.conv1_1(x)
         x = self.bn1_1(x)
         x = self.relu1_1(x)
+        outs.append(x)
+        # 64 32 128
 
         x = self.conv1_2(x)
         x = self.bn1_2(x)
         x = self.relu1_2(x)
+        outs.append(x)
+        # 128 32 128
 
-        outs = []
+        # layers 1: (256,16,64) 2: (256,8,32)  3: (512,4,32)
+
         for i in range(4):
             layer_index = i + 2
             pool_layer = getattr(self, f'pool{layer_index}')
@@ -136,6 +143,13 @@ class ResNet31OCR(BaseModule):
             x = conv_layer(x)
             x = bn_layer(x)
             x = relu_layer(x)
+
+            if i == 0 and tpsnet != None:
+                # draw_feature_map(x)
+                outputs = tpsnet(x, epoch=5, outs = outs)
+                if outputs.get('output', None) != None:
+                    x = outputs['output']
+                    logits = outputs['logits']
 
             outs.append(x)
 

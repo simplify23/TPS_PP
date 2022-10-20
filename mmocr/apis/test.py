@@ -4,6 +4,7 @@ import os.path as osp
 import mmcv
 import numpy as np
 import torch
+import time
 from mmcv.image import tensor2imgs
 from mmcv.parallel import DataContainer
 from mmdet.core import encode_mask_results
@@ -69,6 +70,7 @@ def single_gpu_test(model,
     results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
+    start_time = time.time()
     for data in data_loader:
         with torch.no_grad():
             result = model(return_loss=False, rescale=True, **data)
@@ -154,4 +156,6 @@ def single_gpu_test(model,
 
         for _ in range(batch_size):
             prog_bar.update()
+    end_time = time.time()
+    print("\n This test using : {:.2f}ms per images\n".format((end_time-start_time)/len(dataset)*1000))
     return results

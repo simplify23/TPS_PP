@@ -2,11 +2,34 @@
 import warnings
 
 import torch
-
+import time
 from mmocr.models.builder import (DETECTORS, build_backbone, build_convertor,
                                   build_decoder, build_encoder, build_fuser,
                                   build_loss, build_preprocessor)
 from .encode_decode_recognizer import EncodeDecodeRecognizer
+from mmcv.runner import RUNNERS, EpochBasedRunner
+
+@RUNNERS.register_module()
+class RunnerWrapper(EpochBasedRunner):
+    def train(self, data_loader, **kwargs):
+        self.model.train()
+        self.model.module.epoch = self._epoch
+        self.model.module.backbone.epoch = self._epoch
+        # self.model.module.decoder.epoch = self._epoch
+        self.mode = 'train'
+        self.data_loader = data_loader
+        self._max_iters = self._max_epochs * len(self.data_loader)
+        self.call_hook('before_train_epoch')
+        time.sleep(2)  # Prevent possible deadlock during epoch transition
+        for i, data_batch in enumerate(self.data_loader):
+            self._inner_iter = i
+            self.call_hook('before_train_iter')
+            self.run_iter(data_batch, train_mode=True, **kwargs)
+            self.call_hook('after_train_iter')
+            self._iter = self._iter + 1
+
+        self.call_hook('after_train_epoch')
+        self._epoch = self._epoch + 1
 
 
 @DETECTORS.register_module()
@@ -33,7 +56,8 @@ class MixNet(EncodeDecodeRecognizer):
                  pretrained=None,
                  init_cfg=None):
         super(EncodeDecodeRecognizer, self).__init__(init_cfg=init_cfg)
-
+        self.num_classes= 37
+        # self.epoch = 5
         # Label convertor (str2tensor, tensor2str)
         if en_label_convertor is not None:
             en_label_convertor.update(max_seq_len=max_seq_len)
@@ -44,6 +68,7 @@ class MixNet(EncodeDecodeRecognizer):
         assert label_convertor is not None
         label_convertor.update(max_seq_len=max_seq_len)
         self.label_convertor = build_convertor(label_convertor)
+        self.padding_idx = self.label_convertor.padding_idx
 
         # Preprocessor module, e.g., TPS
         self.preprocessor = None
@@ -57,24 +82,32 @@ class MixNet(EncodeDecodeRecognizer):
         # Encoder module
         self.encoder = None
         if encoder is not None:
-            encoder.update(num_classes=self.label_convertor.num_classes())
+            encoder.update(num_classes=self.num_classes)
             self.encoder = build_encoder(encoder)
 
         # Decoder module
         self.decoder = None
         if decoder is not None:
-            decoder.update(num_classes=self.label_convertor.num_classes())
-            # decoder.update(start_idx=self.label_convertor.start_idx)
+            decoder.update(num_classes=self.num_classes)
+            decoder.update(mask_id=self.label_convertor.padding_idx)
+            decoder.update(end_id=self.label_convertor.end_idx)
             # decoder.update(padding_idx=self.label_convertor.padding_idx)
             decoder.update(max_seq_len=max_seq_len)
+
             self.decoder = build_decoder(decoder)
 
         # Loss
         assert loss is not None
+        loss.update(padding_idx = self.padding_idx)
+        loss.update(num_classes=self.num_classes)
         self.loss = build_loss(loss)
 
         # assert de_loss is not None
         # self.de_loss = build_loss(de_loss)
+        if tpsnet != None:
+            self.count_param(self.tpsnet,"TPSNet model")
+        if preprocessor != None:
+            self.count_param(self.preprocessor, "Preprocessor model")
 
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
@@ -91,6 +124,34 @@ class MixNet(EncodeDecodeRecognizer):
         if fuser is not None:
             self.fuser = build_fuser(fuser)
 
+    def _get_location_mask(self, token_len=None, mask_fill = float('-inf'), dot_v =  1,device = None):
+        """Generate location masks given input sequence length.
+
+        Args:
+            seq_len (int): The length of input sequence to transformer.
+            device (torch.device or str, optional): The device on which the
+                masks will be placed.
+
+        Returns:
+            Tensor: A mask tensor of shape (seq_len, seq_len) with -infs on
+            diagonal and zeros elsewhere.
+        """
+        mask = torch.eye(token_len,device = device)
+        other_mask = (1-mask).float().masked_fill(1-mask == 1, mask_fill)
+        mask = mask.float().masked_fill(mask == 1, mask_fill)
+
+        return  torch.stack((mask, other_mask), 0) * dot_v
+
+    def _local_mask(self,targets_dict):
+        pass
+
+    def freeze_network(self):
+        # self.encoder.eval()
+        # for name, parameter in self.encoder.named_parameters():
+        #     parameter.requires_grad = False
+            # print("{}: {}".format(parameter,parameter.requries_grad))
+        self.backbone.freeze_network()
+
     def forward_train(self, img, img_metas):
         """
         Args:
@@ -105,6 +166,7 @@ class MixNet(EncodeDecodeRecognizer):
         Returns:
             dict[str, tensor]: A dictionary of loss components.
         """
+        # self.freeze_network()
         for img_meta in img_metas:
             valid_ratio = 1.0 * img_meta['resize_shape'][1] / img.size(-1)
             img_meta['valid_ratio'] = valid_ratio
@@ -122,26 +184,34 @@ class MixNet(EncodeDecodeRecognizer):
         # text_logits = None
         # out_enc = None
         if self.encoder is not None:
-            logits, out_enc = self.encoder(feat)
+            enc_logits, feat = self.encoder(feat)
 
 
         out_dec = None
-        feat = None
+        # feat = None
         # print(out_enc.shape)
         if self.decoder is not None:
             out_dec = self.decoder(
                 feat,
-                out_enc,
+                enc_logits,
                 targets_dict,
                 img_metas,
                 train_mode=True)
+        out_fuser = None
+        if self.fuser is not None:
+            out_fuser = self.fuser(feat[:,:self.max_seq_len,:], out_dec[-1]['dec_out'])
+            # text_logits = out_fuser['logits']
+            # out_fusers.append(out_fuser)
 
         outputs = dict(
-            out_enc=logits, out_dec=out_dec)
+            out_enc=enc_logits, out_dec=out_dec, out_fusers=out_fuser)
+        # outputs = out_dec
 
-        losses = self.loss(outputs, targets_dict, targets_dict_en, img_metas)
+        losses = self.loss(outputs, targets_dict, targets_dict_en, self.epoch,img_metas)
 
         return losses
+        # index = (enc_logits.max(-1)[1]==36)
+
 
     def simple_test(self, img, img_metas, **kwargs):
         """Test function with test time augmentation.
@@ -157,22 +227,44 @@ class MixNet(EncodeDecodeRecognizer):
             valid_ratio = 1.0 * img_meta['resize_shape'][1] / img.size(-1)
             img_meta['valid_ratio'] = valid_ratio
 
+        if self.preprocessor is not None:
+            img = self.preprocessor(img)
         feat = self.extract_feat(img)
 
         text_logits = None
-        out_enc = None
+        enc_logits = None
         if self.encoder is not None:
-            logits,out_enc = self.encoder(feat)
-            text_logits = out_enc
+            enc_logits, feat = self.encoder(feat)
+            # text_logits = out_enc
 
         out_dec = None
+
         if self.decoder is not None:
             out_dec = self.decoder(
-                feat, text_logits, img_metas=img_metas, train_mode=False)
+                feat,
+                enc_logits,
+                img_metas=img_metas, train_mode=False)
 
+        if self.fuser is not None:
+            out_fuser = self.fuser(feat[:,:self.max_seq_len,:], out_dec[-1]['dec_out'])
+            # text_logits = out_fuser['logits']
+            # out_fusers.append(out_fuser)
 
-        ret = out_dec*0.5 + out_enc*0.5
+        # outputs = dict(
+        #     out_enc=enc_logits, out_dec=out_dec, out_fusers=out_fuser)
 
+        # if len(out_dec) == 1:
+        #     ret = out_dec[-1]['dec_class']
+        # else:
+        #     ret = out_dec[-1]['dec_class']
+        # ret = out_dec[-1]['dec_class']
+        # ret = out_fuser['logits']
+        ret = enc_logits
+        # ret = out_dec[-1]['dec_class']
+        # if out_dec.get('out_dec', None) !=None:
+        #     ret = out_dec['out_dec'] * 0.5 + out_dec['out_enc'] * 0.5
+        # else:
+        #     ret = out_dec['out_enc']
         # early return to avoid post processing
         if torch.onnx.is_in_onnx_export():
             return ret['logits']

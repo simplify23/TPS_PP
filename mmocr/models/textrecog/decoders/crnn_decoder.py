@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch.nn as nn
+import einops
 from mmcv.runner import Sequential
 
 from mmocr.models.builder import DECODERS
@@ -45,6 +46,8 @@ class CRNNDecoder(BaseDecoder):
             Tensor: The raw logit tensor. Shape :math:`(N, W, C)` where
             :math:`C` is ``num_classes``.
         """
+        feat = einops.rearrange(feat, 'b c h w -> b c (h w)')
+        feat = feat.unsqueeze(2)
         assert feat.size(2) == 1, 'feature height must be 1'
         if self.rnn_flag:
             x = feat.squeeze(2)  # [N, C, W]

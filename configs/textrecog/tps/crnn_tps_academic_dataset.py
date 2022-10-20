@@ -2,7 +2,7 @@ _base_ = [
     '../../_base_/default_runtime.py', '../../_base_/recog_models/crnn_tps.py',
     '../../_base_/recog_pipelines/crnn_tps_pipeline.py',
     '../../_base_/recog_datasets/MJ_train.py',
-    '../../_base_/recog_datasets/academic_test.py',
+    '../../_base_/recog_datasets/academic_test_high.py',
     '../../_base_/schedules/schedule_adadelta_5e.py'
 ]
 

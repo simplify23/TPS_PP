@@ -30,7 +30,7 @@ class ResNetABI(BaseModule):
                  stem_channels=32,
                  base_channels=32,
                  arch_settings=[3, 4, 6, 6, 3],
-                 strides=[2, 1, 2, 1, 2],
+                 strides=[2, 1, 2, 1, 1],
                  out_indices=None,
                  last_stage_pool=False,
                  init_cfg=[
@@ -94,9 +94,41 @@ class ResNetABI(BaseModule):
         self.conv1 = nn.Conv2d(
             in_channels, stem_channels, kernel_size=3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm2d(stem_channels)
-        self.relu1 = nn.ReLU(inplace=True)
+        self.relu1 = nn.ReLU()
 
-    def forward(self, x):
+    def forward(self, x, tpsnet=None,test=False):
+        """
+        Args:
+            x (Tensor): Image tensor of shape :math:`(N, 3, H, W)`.
+
+        Returns:
+            Tensor or list[Tensor]: Feature tensor. Its shape depends on
+            ResNetABI's config. It can be a list of feature outputs at specific
+            layers if ``out_indices`` is specified.
+        """
+
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu1(x)
+
+        outs = []
+        for i, layer_name in enumerate(self.res_layers):
+            res_layer = getattr(self, layer_name)
+
+            if i == 2 and tpsnet != None:
+                # draw_feature_map(x)
+                outputs = tpsnet(x, epoch=5, outs=outs)
+                if outputs.get('output', None) != None:
+                    x = outputs['output']
+                    logits = outputs['logits']
+
+            outs.append(x)
+            x = res_layer(x)
+
+        return tuple(outs) if self.out_indices else x
+
+    def forward2(self, x):
         """
         Args:
             x (Tensor): Image tensor of shape :math:`(N, 3, H, W)`.

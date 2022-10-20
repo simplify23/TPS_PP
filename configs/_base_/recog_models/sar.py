@@ -4,6 +4,7 @@ label_convertor = dict(
 model = dict(
     type='SARNet',
     backbone=dict(type='ResNet31OCR'),
+    tpsnet=dict(type='U_TPSnet_Warp',),
     encoder=dict(
         type='SAREncoder',
         enc_bi_rnn=False,

@@ -2,6 +2,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import copy
+import csv
 import os
 import os.path as osp
 import time
@@ -138,6 +139,12 @@ def main():
     log_file = osp.join(cfg.work_dir, f'{timestamp}.log')
     logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
 
+    path = "data_any.csv"
+    with open(path, 'a+') as f:
+        csv_write = csv.writer(f)
+        data_row = [cfg.work_dir]
+        csv_write.writerow(data_row)
+
     # init the meta dict to record some important information such as
     # environment info and seed, which will be logged
     meta = dict()
@@ -151,7 +158,7 @@ def main():
     meta['config'] = cfg.pretty_text
     # log some basic info
     logger.info(f'Distributed training: {distributed}')
-    logger.info(f'Config:\n{cfg.pretty_text}')
+    # logger.info(f'Config:\n{cfg.pretty_text}')
 
     # set random seeds
     seed = init_random_seed(args.seed)
@@ -166,6 +173,7 @@ def main():
         cfg.model,
         train_cfg=cfg.get('train_cfg'),
         test_cfg=cfg.get('test_cfg'))
+    logger.info("Model have {}M paramerters in total\n".format(sum(x.numel() for x in model.parameters()) / 1e6))
     model.init_weights()
 
     datasets = [build_dataset(cfg.data.train)]

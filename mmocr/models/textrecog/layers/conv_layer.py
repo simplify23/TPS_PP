@@ -45,7 +45,7 @@ class Bottleneck(nn.Module):
         self.conv3 = nn.Conv2d(
             planes, planes * self.expansion, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * self.expansion)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU()
         if downsample:
             self.downsample = nn.Sequential(
                 nn.Conv2d(

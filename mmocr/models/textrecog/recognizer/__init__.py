@@ -10,8 +10,9 @@ from .satrn import SATRN
 from .seg_recognizer import SegRecognizer
 from .mixnet import MixNet
 from .MaskNet import MaskNet
+from .TPSNet import TPSNet
 
 __all__ = [
     'BaseRecognizer', 'EncodeDecodeRecognizer', 'CRNNNet', 'SARNet', 'NRTR',
-    'SegRecognizer', 'RobustScanner', 'SATRN', 'ABINet','MixNet','MaskNet'
+    'SegRecognizer', 'RobustScanner', 'SATRN', 'ABINet','MixNet','MaskNet','TPSNet'
 ]

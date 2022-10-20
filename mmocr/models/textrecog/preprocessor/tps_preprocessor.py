@@ -197,7 +197,11 @@ class GridGenerator(nn.Module):
         #                       self.P)).float().cuda()  # n x num_fiducial+3
 
     def _build_C(self, num_fiducial):
-        """Return coordinates of fiducial points in rectified_img; C."""
+        """Return coordinates of fiducial points in rectified_img; C.
+        +++++
+        -----
+        +++++
+        """
         ctrl_pts_x = np.linspace(-1.0, 1.0, int(num_fiducial / 2))
         ctrl_pts_y_top = -1 * np.ones(int(num_fiducial / 2))
         ctrl_pts_y_bottom = np.ones(int(num_fiducial / 2))
@@ -211,10 +215,10 @@ class GridGenerator(nn.Module):
         hat_C = np.zeros((num_fiducial, num_fiducial), dtype=float)
         for i in range(0, num_fiducial):
             for j in range(i, num_fiducial):
-                r = np.linalg.norm(C[i] - C[j])
+                r = np.linalg.norm(C[i] - C[j])  #sqrt(i-j)^2 [euclidean distance]
                 hat_C[i, j] = r
                 hat_C[j, i] = r
-        np.fill_diagonal(hat_C, 1)
+        np.fill_diagonal(hat_C, 1)  #主对角线填充1
         hat_C = (hat_C**2) * np.log(hat_C)
         # print(C.shape, hat_C.shape)
         delta_C = np.concatenate(  # num_fiducial+3 x num_fiducial+3
@@ -228,10 +232,13 @@ class GridGenerator(nn.Module):
                                axis=1)  # 1 x num_fiducial+3
             ],
             axis=0)
-        inv_delta_C = np.linalg.inv(delta_C)
+        inv_delta_C = np.linalg.inv(delta_C) #delta_C 取反
         return inv_delta_C  # num_fiducial+3 x num_fiducial+3
 
     def _build_P(self, rectified_img_width, rectified_img_height):
+        '''
+        meshgrid for P in rectified_img
+        '''
         rectified_img_grid_x = (
             np.arange(-rectified_img_width, rectified_img_width, 2) +
             1.0) / rectified_img_width  # self.rectified_img_width

@@ -4,7 +4,7 @@ _base_ = [
     '../../_base_/schedules/schedule_adam_step_5e.py',
     '../../_base_/recog_pipelines/sar_pipeline.py',
     '../../_base_/recog_datasets/ST_SA_MJ_real_train.py',
-    '../../_base_/recog_datasets/academic_test.py'
+    '../../_base_/recog_datasets/academic_test_high.py'
 ]
 
 train_list = {{_base_.train_list}}
