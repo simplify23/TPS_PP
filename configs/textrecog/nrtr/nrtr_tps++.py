@@ -40,7 +40,7 @@ model = dict(
     backbone=dict(type='ResNetABI',
                   strides=[2, 1, 2, 1, 2], ),
     # tpsnet=dict(type='U_TPSnet_Warp'),
-    tpsnet=dict(type='U_TPSnet_v3'),
+    # tpsnet=dict(type='U_TPSnet_v3'),
     encoder=dict(type='NRTREncoder'),
     decoder=dict(type='NRTRDecoder'),
     loss=dict(type='TFLoss'),
@@ -48,7 +48,7 @@ model = dict(
     max_seq_len=40)
 
 data = dict(
-    samples_per_gpu=128,
+    samples_per_gpu=200,
     workers_per_gpu=12,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=10),

@@ -10,6 +10,7 @@ from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, Sequential, ModuleList
 from mmocr.models.builder import BACKBONES
 from mmocr.models.textrecog.backbones.utils.component import Unet, Unet_down3, Unet_Tiny, PointNet, Unet_Base
+from mmocr.models.textrecog.backbones.utils.mlp import WeightedPermuteMLPv2
 from mmocr.models.textrecog.decoders.transformer_mask import TransDecoderLayer, TFCommonDecoderLayer
 
 
@@ -268,6 +269,7 @@ class UNetwork(nn.Module):
         self.num_fiducial = self.point_y * self.point_x
 
         self.atten = ModuleList([
+            # WeightedPermuteMLPv2( num_img_channel, segment_dim=8, qkv_bias=False, height=1,width=63, proj_drop=0.)
             TFCommonDecoderLayer(d_model=num_img_channel,
                                  d_inner=num_img_channel * self.tf_ratio,
                                  n_head=4,

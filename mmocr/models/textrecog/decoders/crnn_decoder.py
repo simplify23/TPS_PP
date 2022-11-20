@@ -5,6 +5,7 @@ from mmcv.runner import Sequential
 
 from mmocr.models.builder import DECODERS
 from mmocr.models.textrecog.layers import BidirectionalLSTM
+from .Trans import TFCommonDecoderLayer
 from .base_decoder import BaseDecoder
 
 

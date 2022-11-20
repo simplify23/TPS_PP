@@ -177,7 +177,7 @@ class UTransformerEncoder(BaseModule):
         feat = self.cls2(feat)
         return indexes, feat
 
-    def forward(self, feature):
+    def forward(self, feature, img_metas=None):
         """
         Args:
             feature (Tensor): Feature tensor of shape :math:`(N, D_m, H, W)`.

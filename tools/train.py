@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+CUDA_VISIBLE_DEVICES=6
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import copy

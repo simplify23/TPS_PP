@@ -31,4 +31,4 @@ train2 = {key: value for key, value in train1.items()}
 train2['img_prefix'] = train_img_prefix2
 train2['ann_file'] = train_ann_file2
 
-train_list = [train1, train2]
+train_list = [train1]

@@ -127,7 +127,7 @@ class Unet_down3(Unet):
             self._encoder_layer(in_channels * u_channel, num_channels * ratio[0], stride=1),
             self._encoder_layer(num_channels * ratio[0], num_channels * ratio[1], stride=2),
             self._encoder_layer(num_channels * ratio[1], num_channels * ratio[2], stride=stride),
-            # self._encoder_layer(num_channels, num_channels, stride=2),
+            self._encoder_layer(num_channels, num_channels, stride=(2,1)),
             # self._encoder_layer(num_channels, num_channels, stride=(1,2))
         )
 
@@ -140,7 +140,7 @@ class Unet_down3(Unet):
         self.atten = CBAM(num_channels * ratio[2])
 
         self.k_decoder = nn.Sequential(
-            # self._decoder_layer(num_channels, num_channels, scale_factor=(1,2), mode=attn_mode),
+            self._decoder_layer(num_channels, num_channels, scale_factor=(2,1), mode=attn_mode),
             # self._decoder_layer(num_channels, num_channels, scale_factor=2, mode=attn_mode),
 
             self._decoder_layer(

@@ -924,13 +924,14 @@ class U_TPSnet_Warp(U_TPSnetv2):
 class U_TPSnet_v3(BaseModule):
     '''
     new multi-layers
+    for paper tps_pp final version
     '''
     def __init__(self,
                  num_fiducial=64,
                  img_size=(16, 64),
                  rectified_img_size=(16, 64),
                  num_img_channel=64,
-                 point_size=(4,16),
+                 point_size=(2,16),
                  p_stride=2,
                  visual_point=False,
                  init_cfg=None,
@@ -1028,7 +1029,7 @@ class U_TPSnet_v3(BaseModule):
         cc_score = 0.0
         pc_score = self.atten_score(f, p1)
         if self.without_as == True:
-            # if epoch <= 5 or self.without_as == True:
+        # if epoch <= 5 or self.without_as == True:
             pc_score = torch.zeros_like(pc_score)
         return cc_score, pc_score
 
@@ -1057,9 +1058,10 @@ class U_TPSnet_v3(BaseModule):
         batch_C_prime = logits['point']
         u_feat = logits['feature']
         point_feat = logits['point_feat']
+        # print(point_feat.shape)
 
         if self.visual_point == True:
-            draw_point_map(einops.rearrange(batch_C_prime, 'b (h w) c -> b h w c', h=4, w=16))
+            draw_point_map(einops.rearrange(batch_C_prime, 'b (h w) c -> b h w c', h=2, w=16))
 
         cc_score,pc_score = self.get_score(point_feat,u_feat,epoch)
         build_P_prime = self.GridGenerator_atten.build_P_prime(
