@@ -7,8 +7,6 @@ from mmocr.models.builder import (DETECTORS, build_backbone, build_convertor,
                                   build_decoder, build_encoder, build_fuser,
                                   build_loss, build_preprocessor)
 from .encode_decode_recognizer import EncodeDecodeRecognizer
-
-
 @DETECTORS.register_module()
 class ABINet(EncodeDecodeRecognizer):
     """Implementation of `Read Like Humans: Autonomous, Bidirectional and
@@ -22,6 +20,7 @@ class ABINet(EncodeDecodeRecognizer):
                  backbone=None,
                  encoder=None,
                  decoder=None,
+                 tpsnet=None,
                  iter_size=1,
                  fuser=None,
                  loss=None,
@@ -38,10 +37,21 @@ class ABINet(EncodeDecodeRecognizer):
         label_convertor.update(max_seq_len=max_seq_len)
         self.label_convertor = build_convertor(label_convertor)
 
+        # TPSNet
+        if tpsnet is not None:
+            self.tpsnet = build_backbone(tpsnet)
+        else:
+            self.tpsnet = None
+
         # Preprocessor module, e.g., TPS
         self.preprocessor = None
         if preprocessor is not None:
             self.preprocessor = build_preprocessor(preprocessor)
+
+        if tpsnet != None:
+            self.count_param(self.tpsnet,"TPSNet model")
+        if preprocessor != None:
+            self.count_param(self.preprocessor, "TPS_Origin model")
 
         # Backbone
         assert backbone is not None
@@ -98,7 +108,7 @@ class ABINet(EncodeDecodeRecognizer):
             valid_ratio = 1.0 * img_meta['resize_shape'][1] / img.size(-1)
             img_meta['valid_ratio'] = valid_ratio
 
-        feat = self.extract_feat(img)
+        feat = self.extract_feat(img,test=False)
 
         gt_labels = [img_meta['text'] for img_meta in img_metas]
 
@@ -148,7 +158,7 @@ class ABINet(EncodeDecodeRecognizer):
             valid_ratio = 1.0 * img_meta['resize_shape'][1] / img.size(-1)
             img_meta['valid_ratio'] = valid_ratio
 
-        feat = self.extract_feat(img)
+        feat = self.extract_feat(img,test=True)
 
         text_logits = None
         out_enc = None

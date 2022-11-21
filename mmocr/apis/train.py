@@ -9,8 +9,8 @@ from mmcv.runner import (DistSamplerSeedHook, EpochBasedRunner,
                          Fp16OptimizerHook, OptimizerHook, build_optimizer,
                          build_runner, get_dist_info)
 from mmdet.core import DistEvalHook, EvalHook
-from mmdet.datasets import build_dataloader, build_dataset
-
+from mmdet.datasets import  build_dataset
+from mmocr.apis.builder import build_dataloader
 from mmocr.apis.utils import (disable_text_recog_aug_test,
                               replace_image_to_tensor)
 from mmocr.utils import get_root_logger
@@ -36,7 +36,7 @@ def train_detector(model,
             num_gpus=len(cfg.gpu_ids)),
         **({} if torch.__version__ != 'parrots' else dict(
                prefetch_num=2,
-               pin_memory=False,
+               pin_memory=True,
            )),
         **dict((k, cfg.data[k]) for k in [
                    'samples_per_gpu',

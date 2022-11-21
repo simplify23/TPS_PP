@@ -141,6 +141,7 @@ def load_mat_info(img_info, gt_file):
         # convert to COCO style XYWH format
         min_x, min_y, max_x, max_y = polygon.bounds
         bbox = [min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y]
+        # bbox = [min_x, min_y, max_x - min_x, max_y - min_y]
         anno = dict(word=word, bbox=bbox)
         anno_info.append(anno)
 

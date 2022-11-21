@@ -18,6 +18,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
                  backbone=None,
                  encoder=None,
                  decoder=None,
+                 tpsnet = None,
                  loss=None,
                  label_convertor=None,
                  train_cfg=None,
@@ -42,6 +43,15 @@ class EncodeDecodeRecognizer(BaseRecognizer):
         assert backbone is not None
         self.backbone = build_backbone(backbone)
 
+        if tpsnet is not None:
+            self.tpsnet = build_backbone(tpsnet)
+        else:
+            self.tpsnet = None
+
+        if tpsnet != None:
+            self.count_param(self.tpsnet,"TPSNet model")
+        if preprocessor != None:
+            self.count_param(self.preprocessor, "Preprocessor model")
         # Encoder module
         self.encoder = None
         if encoder is not None:
@@ -72,12 +82,30 @@ class EncodeDecodeRecognizer(BaseRecognizer):
                 key, please consider using init_cfg')
             self.init_cfg = dict(type='Pretrained', checkpoint=pretrained)
 
-    def extract_feat(self, img):
+    # def extract_feat(self, img):
+    #     """Directly extract features from the backbone."""
+    #     if self.preprocessor is not None:
+    #         img = self.preprocessor(img)
+    #
+    #     x = self.backbone(img)
+    #
+    #     return x
+    def count_param(self, model, name):
+        print("{} have {}M paramerters in total".format(name, sum(x.numel() for x in model.parameters()) / 1e6))
+
+    def extract_feat(self, img,test=False):
         """Directly extract features from the backbone."""
+        # draw_feature_map(img)
         if self.preprocessor is not None:
             img = self.preprocessor(img)
-
-        x = self.backbone(img)
+        # draw_feature_map(img)
+        if self.tpsnet is not None:
+            # x = self.backbone(img,self.tpsnet,test)
+            x= self.backbone(img, self.tpsnet, test)
+        # x = self.backbone(img)
+        else:
+            x = self.backbone(img)
+            # logits = None
 
         return x
 
@@ -138,7 +166,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             valid_ratio = 1.0 * img_meta['resize_shape'][1] / img.size(-1)
             img_meta['valid_ratio'] = valid_ratio
 
-        feat = self.extract_feat(img)
+        feat = self.extract_feat(img,test = True)
 
         out_enc = None
         if self.encoder is not None:

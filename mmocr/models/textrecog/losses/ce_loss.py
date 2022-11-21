@@ -34,6 +34,7 @@ class CELoss(nn.Module):
         self.ignore_first_char = ignore_first_char
 
     def format(self, outputs, targets_dict):
+        # targets = targets_dict
         targets = targets_dict['padded_targets']
         if self.ignore_first_char:
             targets = targets[:, 1:].contiguous()

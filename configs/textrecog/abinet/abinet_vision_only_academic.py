@@ -1,9 +1,9 @@
 _base_ = [
     '../../_base_/default_runtime.py',
-    '../../_base_/schedules/schedule_adam_step_20e.py',
+    '../../_base_/schedules/schedule_adam_step_15e.py',
     '../../_base_/recog_pipelines/abinet_pipeline.py',
     '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
-    '../../_base_/recog_datasets/academic_test.py'
+    '../../_base_/recog_datasets/academic_test_high.py'
 ]
 
 train_list = {{_base_.train_list}}
@@ -11,7 +11,7 @@ test_list = {{_base_.test_list}}
 
 train_pipeline = {{_base_.train_pipeline}}
 test_pipeline = {{_base_.test_pipeline}}
-
+find_unused_parameters = True
 # Model
 num_chars = 37
 max_seq_len = 26
@@ -26,6 +26,7 @@ label_convertor = dict(
 model = dict(
     type='ABINet',
     backbone=dict(type='ResNetABI'),
+    # tpsnet=dict(type='U_TPSnet_v3'),
     encoder=dict(
         type='ABIVisionModel',
         encoder=dict(
@@ -56,9 +57,9 @@ model = dict(
     iter_size=1)
 
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=8,
-    val_dataloader=dict(samples_per_gpu=1),
+    samples_per_gpu=80,
+    workers_per_gpu=12,
+    val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),
     train=dict(
         type='UniformConcatDataset',

@@ -1,3 +1,4 @@
+
 img_norm_cfg = dict(mean=[127], std=[127])
 
 train_pipeline = [
@@ -5,8 +6,8 @@ train_pipeline = [
     dict(
         type='ResizeOCR',
         height=32,
-        min_width=100,
-        max_width=100,
+        min_width=128,
+        max_width=128,
         keep_aspect_ratio=False),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),

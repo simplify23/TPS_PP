@@ -52,11 +52,11 @@ class ABIConvertor(AttnConvertor):
                                       [self.end_idx])
             tensors.append(tensor)
             # target tensor for loss
-            src_target = torch.LongTensor(tensor.size(0) + 1).fill_(0)
-            src_target[0] = self.start_idx
-            src_target[1:] = tensor
+            src_target = torch.LongTensor(tensor.size(0)).fill_(0)
+            # src_target[0] = self.start_idx
+            src_target[0:] = tensor
             padded_target = (torch.ones(self.max_seq_len) *
-                             self.padding_idx).long()
+                             self.end_idx).long()
             char_num = src_target.size(0)
             if char_num > self.max_seq_len:
                 padded_target = src_target[:self.max_seq_len]

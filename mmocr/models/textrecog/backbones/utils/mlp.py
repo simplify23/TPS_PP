@@ -24,7 +24,7 @@ from torch.nn.modules.utils import _pair
 #     'cycle_M': _cfg(crop_pct=0.9),
 #     'cycle_L': _cfg(crop_pct=0.875),
 # }
-from modules.block import SpatialGatingUnit, GatingMlpBlock
+# from modules.block import SpatialGatingUnit, GatingMlpBlock
 
 
 class Mlp(nn.Module):
@@ -137,7 +137,7 @@ class WeightedPermuteMLPv2(nn.Module):
 class PermutatorBlock(nn.Module):
 
     def __init__(self, dim, mlp_ratio=4., taski = 1, patch = 63, segment_dim=8, qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, skip_lam=1.0, mlp_fn=WeightedPermuteMLPv3):
+                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, skip_lam=1.0, mlp_fn=WeightedPermuteMLPv2):
         super().__init__()
         self.norm1 = norm_layer(dim)
         self.attn = mlp_fn(dim, segment_dim=segment_dim, taski=taski,patch=patch,qkv_bias=qkv_bias)
