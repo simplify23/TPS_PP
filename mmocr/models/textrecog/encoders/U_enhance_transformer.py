@@ -117,7 +117,7 @@ class UTransformerEncoder(BaseModule):
         self.pos_encoder = PositionalEncoding(d_model, n_position=max_len)
         self.cls = nn.Linear(d_model, num_classes)
         self.cls2 = nn.Linear(num_classes, num_classes)
-        self.transformer = self.layer_stack = ModuleList([
+        self.transformer = ModuleList([
             TFCommonEncoderLayer(
         d_model, d_inner, n_head, d_model//n_head, d_model//n_head, dropout=dropout)
                 for _ in range(n_layers)])
@@ -200,7 +200,7 @@ class UTransformerEncoder(BaseModule):
         # feature = feature.permute(1,0,2)
         logits = self.cls(feature)
         # _,logits = self.ctc_format(logits, feature,flag = False)
-        return logits, feature
+        return logits
 
         # feature = feature.permute(1, 2, 0)
         # print(feature.shape)
