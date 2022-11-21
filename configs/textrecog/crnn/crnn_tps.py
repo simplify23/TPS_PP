@@ -40,7 +40,7 @@ model = dict(
                   in_channels = 3,
                   strides=[2, 1, 2, 1, 2],),
     # tpsnet=dict(type='U_TPSnet_Warp'),
-    tpsnet=dict(type='U_TPSnet_v3'),
+    # tpsnet=dict(type='U_TPSnet_v3'),
     encoder=dict(
         type='UTransformerEncoder',
         n_layers=2,
@@ -50,12 +50,13 @@ model = dict(
         dropout=0.1,
         max_len=8 * 32,
     ),
-    decoder=dict(type='CRNNDecoder', in_channels=512, rnn_flag=False),
+    # decoder=dict(type='CRNNDecoder', in_channels=512, rnn_flag=False),
+    decoder=None,
     loss=dict(type='CTCLoss'),
     label_convertor=label_convertor,
     pretrained=None)
 data = dict(
-    samples_per_gpu=10,
+    samples_per_gpu=200,
     workers_per_gpu=12,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),

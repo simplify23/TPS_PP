@@ -19,7 +19,7 @@
       <paths name="ztl@10.200.3.80:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/ztl/mmocr" local="$PROJECT_DIR$" />
+            <mapping deploy="/mmocr" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
