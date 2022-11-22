@@ -27,10 +27,10 @@ train_pipeline = [
                         type='Stretch',
                         # max_angle=15,
                     ),
-                    # dict(
-                    #     type='Curve',
-                    #     # max_angle=15,
-                    # ),
+                    dict(
+                        type='Curve',
+                        # max_angle=15,
+                    ),
                     # dict(
                     #     type='TorchVisionWrapper',
                     #     op='RandomAffine',

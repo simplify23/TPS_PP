@@ -191,10 +191,11 @@ class Curve:
         H, W = img.shape[:2]
         # W, H = img.size
 
-        if H != self.side or W != self.side:
-            img = img.resize((self.side, self.side), Image.BICUBIC)
+        # if H != self.side or W != self.side:
+        #     img = img.resize((self.side, self.side), Image.BICUBIC)
 
-        isflip = np.random.uniform(0, 1) > 0.5
+        # isflip = np.random.uniform(0, 1) > 0.5
+        isflip = False
         if isflip:
             img = ImageOps.flip(img)
             # img = TF.vflip(img)
@@ -256,8 +257,10 @@ class Curve:
             rect = (0, 0, self.side, self.side // 2)
 
         img = img.crop(rect)
+        # print("6666")
         img = img.resize((W, H), Image.BICUBIC)
         img = np.array(img).astype(np.uint8)
+        # print("6666")
         result['img'] = img[..., ::-1]
 
         # print(img)
