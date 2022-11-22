@@ -958,10 +958,10 @@ class U_TPSnet_v3(BaseModule):
         self.img_channel = num_img_channel * ic_ratio
         # self.without_as = False
         self.without_as = False
+        u_channel = 1
         if self.type == 'pren':
             u_channel = 0.5
-        else:
-            u_channel = 1
+
         self.Unet = UNetwork(self.num_img_channel,self.point_size,p_stride, u_channel = u_channel)
         self.scale = self.num_img_channel ** -0.5
         self.p_linear = nn.Sequential(
@@ -1043,6 +1043,8 @@ class U_TPSnet_v3(BaseModule):
             Tensor: Rectified image with size :math:`(N, C, H_r, W_r)`.
         """
         # feat_cat = batch_img
+        # print(outs[1].shape)
+        # print(self.down1)
         if outs != None:
             feat0 = self.down0(outs[0])
             feat1 = self.down1(outs[1])
