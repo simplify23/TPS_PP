@@ -10,29 +10,41 @@ train_pipeline = [
         width_downsample_ratio=0.25),
     dict(
         type='RandomWrapper',
-        p=0.5,
+        p=1.0,
         transforms=[
             dict(
                 type='OneOfWrapper',
                 transforms=[
+                    # dict(
+                    #     type='RandomRotateTextDet',
+                    #     max_angle=15,
+                    # ),
                     dict(
-                        type='RandomRotateTextDet',
-                        max_angle=15,
+                        type='Distort',
+                        # max_angle=15,
                     ),
                     dict(
-                        type='TorchVisionWrapper',
-                        op='RandomAffine',
-                        degrees=15,
-                        translate=(0.3, 0.3),
-                        scale=(0.5, 2.),
-                        shear=(-45, 45),
+                        type='Stretch',
+                        # max_angle=15,
                     ),
                     dict(
-                        type='TorchVisionWrapper',
-                        op='RandomPerspective',
-                        distortion_scale=0.5,
-                        p=1,
+                        type='Curve',
+                        # max_angle=15,
                     ),
+                    # dict(
+                    #     type='TorchVisionWrapper',
+                    #     op='RandomAffine',
+                    #     degrees=15,
+                    #     translate=(0.3, 0.3),
+                    #     scale=(0.5, 2.),
+                    #     shear=(-45, 45),
+                    # ),
+                    # dict(
+                    #     type='TorchVisionWrapper',
+                    #     op='RandomPerspective',
+                    #     distortion_scale=0.5,
+                    #     p=1,
+                    # ),
                 ])
         ],
     ),

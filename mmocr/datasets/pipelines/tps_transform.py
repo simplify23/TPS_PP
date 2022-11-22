@@ -13,10 +13,10 @@ class Stretch:
     def __init__(self):
         self.tps = cv2.createThinPlateSplineShapeTransformer()
 
-    def __call__(self, img, mag=-1, prob=1.):
+    def __call__(self, result, mag=-1, prob=1.):
         if np.random.uniform(0, 1) > prob:
-            return img
-        img = img['img']
+            return result
+        img = result['img'][..., ::-1]
         H, W = img.shape[:2]
         # W, H = img.size
         img = np.array(img)
@@ -76,10 +76,13 @@ class Stretch:
         dst_shape = np.array(dstpt).reshape((-1, N, 2))
         src_shape = np.array(srcpt).reshape((-1, N, 2))
         self.tps.estimateTransformation(dst_shape, src_shape, matches)
-        img = self.tps.warpImage(img)
-        img = Image.fromarray(img)
-
-        return img
+        img = self.tps.warpImage(img)[..., ::-1]
+        # img = Image.fromarray(img)
+        result['img'] = img
+        # print(img)
+        # print(img.size)
+        result['img_shape'] = img.shape
+        return result
 
     def __repr__(self):
         repr_str = self.__class__.__name__
@@ -165,7 +168,7 @@ class Distort:
         self.tps.estimateTransformation(dst_shape, src_shape, matches)
         img = self.tps.warpImage(img)
         # img = Image.fromarray(img)
-        result['img'] = img
+        result['img'] = img[..., ::-1]
         # print(img)
         # print(img.size)
         result['img_shape'] = img.shape
@@ -181,16 +184,18 @@ class Curve:
         self.tps = cv2.createThinPlateSplineShapeTransformer()
         self.side = square_side
 
-    def __call__(self, img, mag=-1, prob=1.):
+    def __call__(self, result, mag=-1, prob=1.):
         if np.random.uniform(0, 1) > prob:
-            return img
+            return result
+        img = result['img'][..., ::-1]
+        H, W = img.shape[:2]
+        # W, H = img.size
 
-        W, H = img.size
+        # if H != self.side or W != self.side:
+        #     img = img.resize((self.side, self.side), Image.BICUBIC)
 
-        if H != self.side or W != self.side:
-            img = img.resize((self.side, self.side), Image.BICUBIC)
-
-        isflip = np.random.uniform(0, 1) > 0.5
+        # isflip = np.random.uniform(0, 1) > 0.5
+        isflip = False
         if isflip:
             img = ImageOps.flip(img)
             # img = TF.vflip(img)
@@ -252,8 +257,16 @@ class Curve:
             rect = (0, 0, self.side, self.side // 2)
 
         img = img.crop(rect)
+        # print("6666")
         img = img.resize((W, H), Image.BICUBIC)
-        return img
+        img = np.array(img).astype(np.uint8)
+        # print("6666")
+        result['img'] = img[..., ::-1]
+
+        # print(img)
+        # print(img.size)
+        result['img_shape'] = img.shape
+        return result
 
     def __repr__(self):
         repr_str = self.__class__.__name__
