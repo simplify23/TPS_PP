@@ -93,7 +93,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
     def count_param(self, model, name):
         print("{} have {}M paramerters in total".format(name, sum(x.numel() for x in model.parameters()) / 1e6))
 
-    def extract_feat(self, img,test=False):
+    def extract_feat(self, img,test=False,**kwargs):
         """Directly extract features from the backbone."""
         # draw_feature_map(img)
         if self.preprocessor is not None:
@@ -109,7 +109,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
 
         return x
 
-    def forward_train(self, img, img_metas):
+    def forward_train(self, img, img_metas, **kwargs):
         """
         Args:
             img (tensor): Input images of shape (N, C, H, W).
@@ -127,7 +127,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             valid_ratio = 1.0 * img_meta['resize_shape'][1] / img.size(-1)
             img_meta['valid_ratio'] = valid_ratio
 
-        feat = self.extract_feat(img)
+        feat = self.extract_feat(img,False,**kwargs)
 
         gt_labels = [img_meta['text'] for img_meta in img_metas]
 
