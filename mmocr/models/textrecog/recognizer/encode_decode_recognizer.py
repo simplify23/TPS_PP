@@ -101,7 +101,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
         # draw_feature_map(img)
         if self.tpsnet is not None:
             # x = self.backbone(img,self.tpsnet,test)
-            x= self.backbone(img, self.tpsnet, test)
+            x = self.backbone(img, self.tpsnet, test,**kwargs)
         # x = self.backbone(img)
         else:
             x = self.backbone(img)
