@@ -958,7 +958,7 @@ class U_TPSnet_v3(BaseModule):
         self.img_channel = num_img_channel * ic_ratio
         # self.without_as = False
         self.without_as = False
-        u_channel = 1
+        u_channel = 3
         if self.type == 'pren':
             u_channel = 0.5
 
@@ -1050,13 +1050,13 @@ class U_TPSnet_v3(BaseModule):
             feat1 = self.down1(outs[1])
             feat2 = self.down2(batch_img)
             feat_cat = torch.cat((feat0, feat1, feat2),dim=1)
-            batch_img = self.down_feat(feat_cat)
+            # batch_img = self.down_feat(feat_cat)
         else:
             batch_img = self.down_feat(batch_img)
 
         # res = batch_img
         logits = self.Unet(
-            batch_img)
+            feat_cat)
         batch_C_prime = logits['point']
         u_feat = logits['feature']
         point_feat = logits['point_feat']

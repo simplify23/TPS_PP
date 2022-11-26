@@ -8,7 +8,7 @@
 _base_ = [
     '../../_base_/default_runtime.py',
     '../../_base_/schedules/schedule_adam_step_12e.py',
-    '../../_base_/recog_pipelines/abinet_pipeline.py',
+    '../../_base_/recog_pipelines/crnn_pp_pipeline.py',
     '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
     '../../_base_/recog_datasets/academic_test_high.py'
 ]
@@ -58,7 +58,7 @@ model = dict(
     pretrained=None)
 data = dict(
     samples_per_gpu=200,
-    workers_per_gpu=12,
+    workers_per_gpu=1,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),
     train=dict(

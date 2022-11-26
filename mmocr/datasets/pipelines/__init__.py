@@ -12,7 +12,7 @@ from .ocr_transforms import (FancyPCA, NormalizeOCR, OnlineCropOCR,
 from .test_time_aug import MultiRotateAugOCR
 from .textdet_targets import (DBNetTargets, FCENetTargets, PANetTargets,
                               TextSnakeTargets)
-from .tps_transform import Distort, Stretch
+from .tps_transform import Distort, Stretch, Curve
 from .transform_wrappers import OneOfWrapper, RandomWrapper, TorchVisionWrapper
 from .transforms import (ColorJitter, PyramidRescale, RandomCropFlip,
                          RandomCropInstances, RandomCropPolyInstances,
@@ -30,5 +30,5 @@ __all__ = [
     'sort_vertex', 'LoadImageFromNdarray', 'sort_vertex8', 'FCENetTargets',
     'RandomScaling', 'RandomCropFlip', 'NerTransform', 'ToTensorNER',
     'ResizeNoImg', 'PyramidRescale', 'OneOfWrapper', 'RandomWrapper',
-    'TorchVisionWrapper', 'Distort','Stretch',
+    'TorchVisionWrapper', 'Distort','Stretch','Curve'
 ]
