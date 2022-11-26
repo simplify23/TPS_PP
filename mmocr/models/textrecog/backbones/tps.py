@@ -1033,7 +1033,7 @@ class U_TPSnet_v3(BaseModule):
             pc_score = torch.zeros_like(pc_score)
         return cc_score, pc_score
 
-    def forward(self, batch_img,epoch = 0, outs=None, point=None):
+    def forward(self, batch_img, epoch = 0, outs=None, **kwargs):
         """
         Args:
             batch_img (Tensor): Images to be rectified with size

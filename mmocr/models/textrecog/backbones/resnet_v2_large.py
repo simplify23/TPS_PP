@@ -196,7 +196,49 @@ class ResNetABI_v2_large(BaseModule):
         self.bn1 = nn.BatchNorm2d(stem_channels)
         self.relu1 = nn.ReLU()
 
-    def forward(self, x, tpsnet=None,test=False):
+    def return_feature(self, x, tpsnet=None, test=False,):
+        """
+        Args:
+            x (Tensor): Image tensor of shape :math:`(N, 3, H, W)`.
+
+        Returns:
+            Tensor or list[Tensor]: Feature tensor. Its shape depends on
+            ResNetABI's config. It can be a list of feature outputs at specific
+            layers if ``out_indices`` is specified.
+        """
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu1(x)
+        # logits = None
+
+        outs = []
+        for i, layer_name in enumerate(self.res_layers):
+            res_layer = getattr(self, layer_name)
+
+            # print("TPResnet: {}layer's size is {},{},{}".format(i, x.size(1), x.size(2), x.size(3)))
+            # tps_layers = getattr(self, self.tps_layers[i])
+            # x = tps_layers(x,self.epoch)
+            # print("Resnet: {}layer's size is {},{},{}".format(i, x.size(1), x.size(2), x.size(3)))
+
+            if i == 2 and tpsnet == None:
+                return x
+                # # draw_feature_map(x)
+                # if test == True:
+                #     epoch = 10
+                # else:
+                #     epoch = self.epoch
+                # outputs = tpsnet(x, epoch, outs,**kwargs)
+                # if outputs.get('output', None) != None:
+                #     x = outputs['output']
+                #     logits = outputs['logits']
+
+            outs.append(x)
+            x = res_layer(x)
+
+        # return tuple(outs) if self.out_indices else x
+        return x
+
+    def forward(self, x, tpsnet=None,test=False, **kwargs):
         """
         Args:
             x (Tensor): Image tensor of shape :math:`(N, 3, H, W)`.
@@ -219,6 +261,7 @@ class ResNetABI_v2_large(BaseModule):
         # logits = None
 
         outs = []
+        outputs = None
         for i, layer_name in enumerate(self.res_layers):
             res_layer = getattr(self, layer_name)
 
@@ -233,7 +276,7 @@ class ResNetABI_v2_large(BaseModule):
                     epoch = 10
                 else:
                     epoch = self.epoch
-                outputs = tpsnet(x, epoch, outs)
+                outputs = tpsnet(x, epoch, outs,**kwargs)
                 if outputs.get('output', None) != None:
                     x = outputs['output']
                     logits = outputs['logits']
@@ -248,4 +291,4 @@ class ResNetABI_v2_large(BaseModule):
             #     outs.append(x)
 
         # return tuple(outs) if self.out_indices else x
-        return x
+        return {'output': x, 'ref_img' : outputs.get('output', None)}
