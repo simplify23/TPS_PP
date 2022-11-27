@@ -291,4 +291,4 @@ class ResNetABI_v2_large(BaseModule):
             #     outs.append(x)
 
         # return tuple(outs) if self.out_indices else x
-        return {'output': x, 'ref_img' : outputs.get('output', None)}
+        return {'output': x, 'img_ref' : outputs.get('output', None)}

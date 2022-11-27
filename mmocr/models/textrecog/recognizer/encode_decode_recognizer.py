@@ -29,6 +29,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
 
         super().__init__(init_cfg=init_cfg)
 
+        self.kd_loss = True
         # Label convertor (str2tensor, tensor2str)
         assert label_convertor is not None
         label_convertor.update(max_seq_len=max_seq_len)
@@ -101,7 +102,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
         # draw_feature_map(img)
         if self.tpsnet is not None:
             # x = self.backbone(img,self.tpsnet,test)
-            x = self.backbone_kd(img, test, **kwargs)
+            x = self.tps_img(img, test, **kwargs)
             # x = self.backbone(img, self.tpsnet, test)
         # x = self.backbone(img)
         else:
@@ -110,10 +111,11 @@ class EncodeDecodeRecognizer(BaseRecognizer):
 
         return x
 
-    def backbone_kd(self, img, test, **kwargs):
-        o_img = self.backbone_o.return_fearure(kwargs['img_origin'], None, test)
+    def tps_img(self, img, test, **kwargs):
         x = self.backbone(img, self.tpsnet, test)
-        x['o_img'] = o_img
+        if self.kd_loss == True:
+            o_img = self.backbone_o.return_fearure(kwargs['img_origin'], None, test)
+            x['o_img'] = o_img
         return x
 
     def forward_train(self, img, img_metas, **kwargs):
@@ -135,6 +137,10 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             img_meta['valid_ratio'] = valid_ratio
 
         feat = self.extract_feat(img,False,**kwargs)
+        if len(feat) == 3:
+            img_o = feat['img_o']
+            img_ref = feat['img_ref']
+            feat = feat['output']
 
         gt_labels = [img_meta['text'] for img_meta in img_metas]
 
