@@ -10,7 +10,7 @@ from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, Sequential, ModuleList
 from mmocr.models.builder import BACKBONES
 from mmocr.models.textrecog.backbones.utils.component import Unet, Unet_down3, Unet_Tiny, PointNet, Unet_Base
-from mmocr.models.textrecog.backbones.utils.mlp import WeightedPermuteMLPv2
+# from mmocr.models.textrecog.backbones.utils.mlp import WeightedPermuteMLPv2
 from mmocr.models.textrecog.decoders.transformer_mask import TransDecoderLayer, TFCommonDecoderLayer
 
 

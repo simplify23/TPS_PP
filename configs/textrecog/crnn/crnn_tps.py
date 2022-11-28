@@ -18,6 +18,7 @@ test_list = {{_base_.test_list}}
 train_pipeline = {{_base_.train_pipeline}}
 test_pipeline = {{_base_.test_pipeline}}
 find_unused_parameters = True
+kd_loss = True
 runner = dict(type='RunnerWrapper', max_epochs=12)
 # model
 label_convertor = dict(
@@ -25,6 +26,7 @@ label_convertor = dict(
 
 model = dict(
     type='CRNNNet',
+    kd_loss = kd_loss,
     # preprocessor=dict(
     #     type='MORAN',),
     # preprocessor=dict(
@@ -40,7 +42,9 @@ model = dict(
                   in_channels = 3,
                   strides=[2, 1, 2, 1, 2],),
     # tpsnet=dict(type='U_TPSnet_Warp'),
-    tpsnet=dict(type='U_TPSnet_v3'),
+    tpsnet=dict(type='U_TPSnet_v3',
+                # kd_loss = True
+                ),
     encoder=None,
     # encoder=dict(
     #     type='UTransformerEncoder',

@@ -78,7 +78,7 @@ class Stretch:
 
     def __call__(self, result, mag=-1, prob=1.):
         # print("stretch\n")
-        result['img_origin'] = result['img']
+        # result['img_origin'] = result['img']
         if np.random.uniform(0, 1) > prob:
             return result
         self.tps = cv2.createThinPlateSplineShapeTransformer()
@@ -176,7 +176,7 @@ class Distort:
         # print("distort\n")
         if np.random.uniform(0, 1) > prob:
             return result
-        result['img_origin'] = result['img']
+        # result['img_origin'] = result['img']
         self.tps = cv2.createThinPlateSplineShapeTransformer()
         img = result['img'][..., ::-1]
         H, W = img.shape[:2]
@@ -281,7 +281,7 @@ class Curve:
 
     def __call__(self, result, mag=-1, prob=1.):
         # print("curve\n")
-        result['img_origin'] = result['img']
+        # result['img_origin'] = result['img']
         self.tps = cv2.createThinPlateSplineShapeTransformer()
         if np.random.uniform(0, 1) > prob:
             return result

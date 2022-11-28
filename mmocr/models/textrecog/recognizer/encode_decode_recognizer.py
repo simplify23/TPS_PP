@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
+import copy
 
 import torch
 
@@ -25,11 +26,12 @@ class EncodeDecodeRecognizer(BaseRecognizer):
                  test_cfg=None,
                  max_seq_len=40,
                  pretrained=None,
+                 kd_loss=False,
                  init_cfg=None):
 
         super().__init__(init_cfg=init_cfg)
 
-        self.kd_loss = True
+        self.backbone_o = None
         # Label convertor (str2tensor, tensor2str)
         assert label_convertor is not None
         label_convertor.update(max_seq_len=max_seq_len)
@@ -46,6 +48,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
 
         if tpsnet is not None:
             self.tpsnet = build_backbone(tpsnet)
+            self.kd_loss = kd_loss
         else:
             self.tpsnet = None
 
@@ -94,6 +97,12 @@ class EncodeDecodeRecognizer(BaseRecognizer):
     def count_param(self, model, name):
         print("{} have {}M paramerters in total".format(name, sum(x.numel() for x in model.parameters()) / 1e6))
 
+    def copy_freeze(self,model):
+        self.backbone_o = copy.deepcopy(model)
+        for param in self.backbone_o.parameters():
+            param.requires_grad = False
+        self.backbone_o.eval()
+
     def extract_feat(self, img,test=False,**kwargs):
         """Directly extract features from the backbone."""
         # draw_feature_map(img)
@@ -114,7 +123,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
     def tps_img(self, img, test, **kwargs):
         x = self.backbone(img, self.tpsnet, test)
         if self.kd_loss == True:
-            o_img = self.backbone_o.return_fearure(kwargs['img_origin'], None, test)
+            o_img = self.backbone_o.return_feature(kwargs['img_origin'], None, test)
             x['o_img'] = o_img
         return x
 
@@ -141,7 +150,9 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             img_o = feat['img_o']
             img_ref = feat['img_ref']
             feat = feat['output']
-
+        elif len(feat) == 2:
+            img_ref = feat['img_ref']
+            feat = feat['output']
         gt_labels = [img_meta['text'] for img_meta in img_metas]
 
         targets_dict = self.label_convertor.str2tensor(gt_labels)

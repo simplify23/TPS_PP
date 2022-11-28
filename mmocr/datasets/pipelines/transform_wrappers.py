@@ -62,7 +62,6 @@ class RandomWrapper:
         self.p = p
 
     def __call__(self, results):
-        results['img_origin'] = False
         return results if np.random.uniform() > self.p else self.transforms(
             results)
 
