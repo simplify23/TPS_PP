@@ -1,21 +1,87 @@
 import cv2
 import numpy as np
+from torch import nn
+import torch
+from torchvision.transforms import ToTensor, ToPILImage
 from PIL import Image, ImageOps
 from mmdet.datasets.builder import PIPELINES
+DEVICE = torch.device('cuda:0')
+# '''
+#     PIL resize (W,H)
+#     Torch resize is (H,W)
+# '''
+def norm(points_int, width, height,DEVICE):
+    """
+        将像素点坐标归一化至 -1 ~ 1
+    """
+    points_int_clone = torch.from_numpy(points_int).detach().float().to(DEVICE)
+    x = ((points_int_clone * 2)[..., 0] / (width - 1) - 1)
+    y = ((points_int_clone * 2)[..., 1] / (height - 1) - 1)
+    return torch.stack([x, y], dim=-1).contiguous().view(-1, 2)
 
-'''
-    PIL resize (W,H)
-    Torch resize is (H,W)
-'''
+class TPS(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, X, Y, w, h, device):
+
+        """ 计算grid"""
+        grid = torch.ones(1, h, w, 2, device=device)
+        grid[:, :, :, 0] = torch.linspace(-1, 1, w)
+        grid[:, :, :, 1] = torch.linspace(-1, 1, h)[..., None]
+        grid = grid.view(-1, h * w, 2)
+
+        """ 计算W, A"""
+        n, k = X.shape[:2]
+        device = X.device
+
+        Z = torch.zeros(1, k + 3, 2, device=device)
+        P = torch.ones(n, k, 3, device=device)
+        L = torch.zeros(n, k + 3, k + 3, device=device)
+
+        eps = 1e-9
+        D2 = torch.pow(X[:, :, None, :] - X[:, None, :, :], 2).sum(-1)
+        K = D2 * torch.log(D2 + eps)
+
+        P[:, :, 1:] = X
+        Z[:, :k, :] = Y
+        L[:, :k, :k] = K
+        L[:, :k, k:] = P
+        L[:, k:, :k] = P.permute(0, 2, 1)
+
+        Q = torch.solve(Z, L)[0]
+        W, A = Q[:, :k], Q[:, k:]
+
+        """ 计算U """
+        eps = 1e-9
+        D2 = torch.pow(grid[:, :, None, :] - X[:, None, :, :], 2).sum(-1)
+        U = D2 * torch.log(D2 + eps)
+
+        """ 计算P """
+        n, k = grid.shape[:2]
+        device = grid.device
+        P = torch.ones(n, k, 3, device=device)
+        P[:, :, 1:] = grid
+
+        # grid = P @ A + U @ W
+        grid = torch.matmul(P, A) + torch.matmul(U, W)
+        return grid.view(-1, h, w, 2)
+
+
 
 @PIPELINES.register_module()
 class Stretch:
     def __init__(self):
-        self.tps = cv2.createThinPlateSplineShapeTransformer()
+        # self.tps = tps
+        self.tps = None
+        # self.tps = cv2.createThinPlateSplineShapeTransformer()
 
     def __call__(self, result, mag=-1, prob=1.):
+        # print("stretch\n")
+        result['img_origin'] = result['img']
         if np.random.uniform(0, 1) > prob:
             return result
+        self.tps = cv2.createThinPlateSplineShapeTransformer()
         img = result['img'][..., ::-1]
         H, W = img.shape[:2]
         # W, H = img.size
@@ -75,6 +141,17 @@ class Stretch:
         matches = [cv2.DMatch(i, i, 0) for i in range(N)]
         dst_shape = np.array(dstpt).reshape((-1, N, 2))
         src_shape = np.array(srcpt).reshape((-1, N, 2))
+
+        # ten_img = ToTensor()(img).to(DEVICE)
+        # h, w = ten_img.shape[1], ten_img.shape[2]
+        # ten_source = norm(dst_shape, w, h,DEVICE)
+        # ten_target = norm(src_shape, w, h,DEVICE)
+        #
+        # # tps = TPS()
+        # warped_grid = self.tps(ten_target[None, ...], ten_source[None, ...], w, h, DEVICE)  # 这个输入的位置需要归一化，所以用norm
+        # ten_wrp = torch.grid_sampler_2d(ten_img[None, ...], warped_grid, 0, 0,align_corners=True)
+        # img = np.array(ToPILImage()(ten_wrp[0].cpu()))
+
         self.tps.estimateTransformation(dst_shape, src_shape, matches)
         img = self.tps.warpImage(img)[..., ::-1]
         # img = Image.fromarray(img)
@@ -91,11 +168,16 @@ class Stretch:
 @PIPELINES.register_module()
 class Distort:
     def __init__(self):
-        self.tps = cv2.createThinPlateSplineShapeTransformer()
+        self.tps = None
+        # self.tps = TPS()
+        # self.tps = cv2.createThinPlateSplineShapeTransformer()
 
     def __call__(self, result, mag=-1, prob=1.):
+        # print("distort\n")
         if np.random.uniform(0, 1) > prob:
             return result
+        result['img_origin'] = result['img']
+        self.tps = cv2.createThinPlateSplineShapeTransformer()
         img = result['img'][..., ::-1]
         H, W = img.shape[:2]
         # W, H = img.size
@@ -165,6 +247,17 @@ class Distort:
         matches = [cv2.DMatch(i, i, 0) for i in range(N)]
         dst_shape = np.array(dstpt).reshape((-1, N, 2))
         src_shape = np.array(srcpt).reshape((-1, N, 2))
+
+        # ten_img = ToTensor()(img).to(DEVICE)
+        # h, w = ten_img.shape[1], ten_img.shape[2]
+        # ten_source = norm(dst_shape, w, h,DEVICE)
+        # ten_target = norm(src_shape, w, h,DEVICE)
+        #
+        # # tps = TPS()
+        # warped_grid = self.tps(ten_target[None, ...], ten_source[None, ...], w, h, DEVICE)  # 这个输入的位置需要归一化，所以用norm
+        # ten_wrp = torch.grid_sampler_2d(ten_img[None, ...], warped_grid, 0, 0,align_corners=True)
+        # img = np.array(ToPILImage()(ten_wrp[0].cpu()))
+
         self.tps.estimateTransformation(dst_shape, src_shape, matches)
         img = self.tps.warpImage(img)
         # img = Image.fromarray(img)
@@ -181,23 +274,29 @@ class Distort:
 @PIPELINES.register_module()
 class Curve:
     def __init__(self, square_side=224):
-        self.tps = cv2.createThinPlateSplineShapeTransformer()
+        self.tps = None
+        # self.tps = cv2.createThinPlateSplineShapeTransformer()
         self.side = square_side
+        # self.w_side = 128
 
     def __call__(self, result, mag=-1, prob=1.):
+        # print("curve\n")
+        result['img_origin'] = result['img']
+        self.tps = cv2.createThinPlateSplineShapeTransformer()
         if np.random.uniform(0, 1) > prob:
             return result
         img = result['img'][..., ::-1]
         H, W = img.shape[:2]
         # W, H = img.size
 
-        # if H != self.side or W != self.side:
-        #     img = img.resize((self.side, self.side), Image.BICUBIC)
+        if H != self.side or W != self.side:
+            img = cv2.resize(img, (self.side, self.side), Image.BICUBIC)
 
-        # isflip = np.random.uniform(0, 1) > 0.5
-        isflip = False
+        isflip = np.random.uniform(0, 1) > 0.5
+        # isflip = False
         if isflip:
-            img = ImageOps.flip(img)
+            img = cv2.flip(img, 0)
+            # img = ImageOps.flip(img)
             # img = TF.vflip(img)
 
         img = np.array(img)
@@ -245,17 +344,28 @@ class Curve:
         matches = [cv2.DMatch(i, i, 0) for i in range(N)]
         dst_shape = np.array(dstpt).reshape((-1, N, 2))
         src_shape = np.array(srcpt).reshape((-1, N, 2))
+        # #
+        # ten_img = ToTensor()(img).to(DEVICE)
+        # h, w = ten_img.shape[1], ten_img.shape[2]
+        # ten_source = norm(dst_shape, w, h,DEVICE)
+        # ten_target = norm(src_shape, w, h,DEVICE)
+        #
+        # # tps = TPS()
+        # warped_grid = self.tps(ten_target[None, ...], ten_source[None, ...], w, h, DEVICE)  # 这个输入的位置需要归一化，所以用norm
+        # ten_wrp = torch.grid_sampler_2d(ten_img[None, ...], warped_grid, 0, 0,align_corners=True)
+        # img = np.array(ToPILImage()(ten_wrp[0].cpu()))
+
         self.tps.estimateTransformation(dst_shape, src_shape, matches)
         img = self.tps.warpImage(img)
-        img = Image.fromarray(img)
 
         if isflip:
             # img = TF.vflip(img)
-            img = ImageOps.flip(img)
+            img = cv2.flip(img, 0)
+            # img = ImageOps.flip(img)
             rect = (0, self.side // 2, self.side, self.side)
         else:
             rect = (0, 0, self.side, self.side // 2)
-
+        img = Image.fromarray(img)
         img = img.crop(rect)
         # print("6666")
         img = img.resize((W, H), Image.BICUBIC)

@@ -38,6 +38,7 @@ class OneOfWrapper:
                 raise TypeError('transform must be callable or a dict')
 
     def __call__(self, results):
+        results['img_origin'] = results['img']
         return random.choice(self.transforms)(results)
 
     def __repr__(self):
@@ -61,6 +62,7 @@ class RandomWrapper:
         self.p = p
 
     def __call__(self, results):
+        results['img_origin'] = False
         return results if np.random.uniform() > self.p else self.transforms(
             results)
 
