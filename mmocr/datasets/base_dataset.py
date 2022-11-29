@@ -67,6 +67,11 @@ class BaseDataset(Dataset):
         self.data_infos = build_loader(loader)
         # processing pipeline
         self.pipeline = Compose(pipeline)
+        kd_loss=True
+        self.kd_loss = kd_loss
+        if kd_loss == True:
+            del pipeline[2]
+            self.kd_pipeline = Compose(pipeline)
         # set group flag and class, no meaning
         # for text detect and recognize
         self._set_group_flag()
@@ -96,7 +101,11 @@ class BaseDataset(Dataset):
         img_info = self.data_infos[index]
         results = dict(img_info=img_info)
         self.pre_pipeline(results)
-        return self.pipeline(results)
+        output = self.pipeline(results)
+        if self.kd_loss== True:
+            output['img_origin']=self.kd_pipeline(results)['img']
+        return output
+
 
     def prepare_test_img(self, img_info):
         """Get testing data from pipeline.

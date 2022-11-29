@@ -76,7 +76,7 @@ train_pipeline = [
     dict(type='NormalizeOCR', **img_norm_cfg),
     dict(
         type='Collect',
-        keys=['img','img_origin'],
+        keys=['img'],
         meta_keys=[
             'filename', 'ori_shape', 'img_shape', 'text', 'valid_ratio',
             'resize_shape'

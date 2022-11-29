@@ -8,6 +8,7 @@ from mmocr.models.builder import (DETECTORS, build_backbone, build_convertor,
                                   build_decoder, build_encoder, build_loss,
                                   build_preprocessor)
 from .base import BaseRecognizer
+from ..losses.kd_loss import KD_Loss
 
 
 @DETECTORS.register_module()
@@ -123,8 +124,8 @@ class EncodeDecodeRecognizer(BaseRecognizer):
     def tps_img(self, img, test, **kwargs):
         x = self.backbone(img, self.tpsnet, test)
         if self.kd_loss == True:
-            o_img = self.backbone_o.return_feature(kwargs['img_origin'], None, test)
-            x['o_img'] = o_img
+            o_img = self.backbone_o.return_feature(kwargs.get('img_origin'), None, test)
+            x['img_o'] = o_img
         return x
 
     def forward_train(self, img, img_metas, **kwargs):
@@ -150,6 +151,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             img_o = feat['img_o']
             img_ref = feat['img_ref']
             feat = feat['output']
+            kd_loss = KD_Loss(img_o,img_ref)
         elif len(feat) == 2:
             img_ref = feat['img_ref']
             feat = feat['output']
@@ -173,6 +175,8 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             img_metas,
         )
         losses = self.loss(*loss_inputs)
+        if self.kd_loss == True:
+           losses['loss_kd'] = kd_loss
 
         return losses
 

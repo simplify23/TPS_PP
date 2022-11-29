@@ -61,7 +61,7 @@ model = dict(
     label_convertor=label_convertor,
     pretrained=None)
 data = dict(
-    samples_per_gpu=200,
+    samples_per_gpu=10,
     workers_per_gpu=1,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),
