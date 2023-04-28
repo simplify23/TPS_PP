@@ -4,7 +4,7 @@ The official code of TPS_PP.
 
 The main branch works with **PyTorch 1.6+**.
 
-Documentation: https://mmocr.readthedocs.io/en/latest/.
+This code is based on MMOCR 0.4.0. [Documentation](https://mmocr.readthedocs.io/en/latest/)
 
 ## To Do List
 * [x] CRNN + TPS_PP
@@ -35,17 +35,7 @@ testing
 training
 ├── mixture
 │   ├── Syn90k
-│   │   ├── shuffle_labels.txt
-│   │   ├── label.txt
-│   │   ├── label.lmdb
-│   │   ├── mnt
 │   ├── SynthText
-│   │   ├── alphanumeric_labels.txt
-│   │   ├── shuffle_labels.txt
-│   │   ├── instances_train.txt
-│   │   ├── label.txt
-│   │   ├── label.lmdb
-│   │   ├── synthtext
 ```
 
 
@@ -56,31 +46,31 @@ Get the pretrained models from [BaiduNetdisk(passwd:d6jd)](https://pan.baidu.com
 
 ## Train
 Please refer to the training configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/training.md)
+### CRNN+TPS++
+[CRNN] [CRNN_TPS++]
+```
+PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps.py /share_io03_ssd/ckpt2/ztl/ijcaiv2_crnn_tps_pp 4 
+          --seed=123456 --load-from=../../../ckpt/ztl/reg/mmocr_ijcai/crnn/latest.pth
+```
+### NRTR+TPS++
 
-`CUDA_VISIBLE_DEVICES=0,1,2,3 python train.py --config=configs/CDistNet_config.py`
+Download [CRNN] in `mmocr_ijcai/nrtr/nrtr_latest.pth`
 
-## Eval
+```
+PORT=1338 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py /share_io03_ssd/ckpt2/ztl/ijcaiv2_nrtr_tps_exp2 4 
+          --seed=123456 --load-from=mmocr_ijcai/nrtr/nrtr_latest.pth
+```
+
+## Testing
 Please refer to the testing configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/testing.md)
 
-`CUDA_VISIBLE_DEVICES=0 python eval.py --config=configs/CDistNet_config.py`
 
 
 ## Acknowledgement
 
-This code is based on [MMOCR](https://github.com/open-mmlab/mmocr) MMOCR is an open-source project that is contributed by researchers and engineers from various colleges and companies. 
+This code is based on [MMOCR](https://github.com/open-mmlab/mmocr)  
 
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
-
-## Citation
-```bash 
-@article{Zheng2021CDistNetPM,
-  title={CDistNet: Perceiving Multi-Domain Character Distance for Robust Text Recognition},
-  author={Tianlun Zheng and Zhineng Chen and Shancheng Fang and Hongtao Xie and Yu-Gang Jiang},
-  journal={ArXiv},
-  year={2021},
-  volume={abs/2111.11011}
-}
-```
 
