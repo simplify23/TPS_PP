@@ -19,18 +19,18 @@ train_pipeline = [
                         type='RandomRotateTextDet',
                         max_angle=15,
                     ),
-                    dict(
-                        type='Distort',
-                        # max_angle=15,
-                    ),
-                    dict(
-                        type='Stretch',
-                        # max_angle=15,
-                    ),
-                    dict(
-                        type='Curve',
-                        # max_angle=15,
-                    ),
+                    # dict(
+                    #     type='Distort',
+                    #     # max_angle=15,
+                    # ),
+                    # dict(
+                    #     type='Stretch',
+                    #     # max_angle=15,
+                    # ),
+                    # dict(
+                    #     type='Curve',
+                    #     # max_angle=15,
+                    # ),
                     dict(
                         type='TorchVisionWrapper',
                         op='RandomAffine',
@@ -85,24 +85,18 @@ train_pipeline = [
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
-        type='MultiRotateAugOCR',
-        rotate_degrees=[0, 90, 270],
-        transforms=[
-            dict(
-                type='ResizeOCR',
-                height=32,
-                min_width=128,
-                max_width=128,
-                keep_aspect_ratio=False,
-                width_downsample_ratio=0.25),
-            dict(type='ToTensorOCR'),
-            dict(type='NormalizeOCR', **img_norm_cfg),
-            dict(
-                type='Collect',
-                keys=['img'],
-                meta_keys=[
-                    'filename', 'ori_shape', 'img_shape', 'valid_ratio',
-                    'resize_shape'
-                ]),
-        ])
+        type='ResizeOCR',
+        height=32,
+        min_width=32,
+        max_width=128,
+        keep_aspect_ratio=False),
+    dict(type='ToTensorOCR'),
+    dict(type='NormalizeOCR', **img_norm_cfg),
+    dict(
+        type='Collect',
+        keys=['img'],
+        meta_keys=[
+            'filename', 'ori_shape', 'img_shape', 'valid_ratio',
+            'resize_shape'
+        ]),
 ]

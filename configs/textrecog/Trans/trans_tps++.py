@@ -31,22 +31,22 @@ de_label_convertor = dict(
 #     type='AttnConvertor', dict_type='DICT90', with_unknown=True)
 en_label_convertor = dict(
     type='CTCConvertor', dict_type='DICT36', with_unknown=True, lower=True)
-
+kd_loss = False
 model = dict(
     type='TPSNet',
+    preprocessor=dict(
+        type='TPS_PPv2',
+        # point_size=(2,16),
+        # p_stride=2,
+    ),
     # preprocessor=dict(
     #     type='TPSPreprocessor',
     #     num_fiducial=20,
     #     img_size=(32, 128),
     #     rectified_img_size=(32, 128),
     #     num_img_channel=3,
-    #     init_cfg=dict(
-    #                 type='Pretrained',
-    #                 checkpoint='ckpt/ztl/reg/mmocr/Backbonev14_1_abstudy_first_layer_tps_training_end_to_end/latest.pth',
-    #                 prefix='preprocessor.',
-    #     )
     # ),
-    tpsnet = dict(type='U_TPSnet_v3',),
+    # tpsnet = dict(type='U_TPSnet_v3',),
     # tpsnet = dict(type='U_TPSnet',),
     # # # backbone = dict(type='ResNet31OCR'),
     backbone=dict(type='ResNetABI_v2_large',
@@ -125,9 +125,9 @@ model = dict(
 )
 
 data = dict(
-    samples_per_gpu=10,
-    workers_per_gpu=12,
-    val_dataloader=dict(samples_per_gpu=10),
+    samples_per_gpu=200,
+    workers_per_gpu=10,
+    val_dataloader=dict(samples_per_gpu=1),
     test_dataloader=dict(samples_per_gpu=1),
     train=dict(
         type='UniformConcatDataset',

@@ -12,7 +12,8 @@ from .resnet_v3 import ResNetABI_v3
 from .resnet_v2_large import ResNetABI_v2_large
 from .tps import U_TPSnet,U_TPSnet_v3
 from .efficienet import efficientnet
+from .tps_pp.tps_pp import TPS_PP
 __all__ = [
     'ResNet31OCR', 'VeryDeepVgg', 'NRTRModalityTransform', 'ShallowCNN','efficientnet',
-    'ResNetABI','VAN','PVTR','SPTR','ResNetABI_v2','ResNetABI_v3','ResNetABI_v2_large','U_TPSnet','U_TPSnet_v3'
+    'ResNetABI','VAN','PVTR','SPTR','ResNetABI_v2','ResNetABI_v3','ResNetABI_v2_large','U_TPSnet','U_TPSnet_v3','TPS_PP'
 ]
