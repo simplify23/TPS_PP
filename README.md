@@ -3,7 +3,7 @@
 
 The official code of TPS_PP (IJCAI 2023)
 
-This code is based on MMOCR 0.4.0 ( [Documentation](https://mmocr.readthedocs.io/en/latest/) ) with **PyTorch 1.6+**.
+TPS++, an attention-enhanced TPS transformation that incorporates the attention mechanism to text rectification for the first time.  TPS++ builds a more flexible content-aware rectifier, generating a natural text correction that is easier to read by the subsequent recognizer. This code is based on MMOCR 0.4.0 ( [Documentation](https://mmocr.readthedocs.io/en/latest/) ) with **PyTorch 1.6+**.
 
 ## To Do List
 * [x] CRNN + TPS_PP
