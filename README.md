@@ -1,10 +1,9 @@
 # TPS++: Attention-Enhanced Thin-Plate Spline for Scene Text Recognition
+![1682662695807](https://user-images.githubusercontent.com/39580716/235069522-7e7c5013-9782-4b46-b757-0472df4c56b2.png)
 
-The official code of TPS_PP.
+The official code of TPS_PP (IJCAI 2023)
 
-The main branch works with **PyTorch 1.6+**.
-
-This code is based on MMOCR 0.4.0. [Documentation](https://mmocr.readthedocs.io/en/latest/)
+This code is based on MMOCR 0.4.0 ( [Documentation](https://mmocr.readthedocs.io/en/latest/) ) with **PyTorch 1.6+**.
 
 ## To Do List
 * [x] CRNN + TPS_PP
@@ -62,7 +61,7 @@ PORT=1234 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py ./ckpt/ijca
 ```
 
 ## Testing
-Please refer to the testing configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/testing.md)
+Please refer to the testing configuration [Testing Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/testing.md)
 
 
 
