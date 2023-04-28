@@ -11,68 +11,68 @@ Documentation: https://mmocr.readthedocs.io/en/latest/.
 * [x] NRTR + TPS_PP
 * [ ] ABINet-LV + TPS
 
+
+## Installation
+
+Please refer to [Install Guide](https://github.com/simplify23/TPS_PP/blob/main/docs/en/install.md).
+
+## Get Started
+
+Please see [Getting Started](https://github.com/simplify23/TPS_PP/blob/main/docs/en/getting_started.md) for the basic usage of MMOCR 0.4.0.
+
 ## Datasets
-**The datasets are same as ABINet**
-- Training datasets
-
-    1. [MJSynth](http://www.robots.ox.ac.uk/~vgg/data/text/) (MJ): 
-        - [LMDB dataset BaiduNetdisk(passwd:n23k)](https://pan.baidu.com/s/1mgnTiyoR8f6Cm655rFI4HQ)
-    2. [SynthText](http://www.robots.ox.ac.uk/~vgg/data/scenetext/) (ST):
-        - [LMDB dataset BaiduNetdisk(passwd:n23k)](https://pan.baidu.com/s/1mgnTiyoR8f6Cm655rFI4HQ)
-
-- Evaluation & Test datasets, LMDB datasets can be downloaded from [BaiduNetdisk(passwd:1dbv)](https://pan.baidu.com/s/1RUg3Akwp7n8kZYJ55rU5LQ), [GoogleDrive](https://drive.google.com/file/d/1dTI0ipu14Q1uuK4s4z32DqbqF3dJPdkk/view?usp=sharing).
-    1. ICDAR 2013 (IC13)
-    2. ICDAR 2015 (IC15)
-    3. IIIT5K Words (IIIT)
-    4. Street View Text (SVT)
-    5. Street View Text-Perspective (SVTP)
-    6. CUTE80 (CUTE)
-
-- The structure of `dataset` directory is
-    ```
-    dataset
-    ├── eval
-    │   ├── CUTE80
-    │   ├── IC13_857
-    │   ├── IC15_1811
-    │   ├── IIIT5k_3000
-    │   ├── SVT
-    │   └── SVTP
-    ├── train
-    │   ├── MJ
-    │   │   ├── MJ_test
-    │   │   ├── MJ_train
-    │   │   └── MJ_valid
-    │   └── ST
-    ```
-## Environment
-package you can find in `env_cdistnet.yaml`.
+The specific configuration of the dataset for training and testing can be found here [Dataset Document](https://github.com/simplify23/TPS_PP/blob/main/docs/en/datasets/recog.md)
 ```
-#Installed
-conda create -n CDistNet python=3.7
-conda install pytorch==1.5.1 torchvision==0.6.1 cudatoolkit=9.2 -c pytorch
-pip install opencv-python mmcv notebook numpy einops tensorboardX Pillow thop timm tornado tqdm matplotlib lmdb
+testing 
+├── mixture
+│   ├── icdar_2013
+│   ├── icdar_2015
+│   ├── III5K
+│   ├── ct80
+│   ├── svt
+│   ├── svtp
+
+training
+├── mixture
+│   ├── Syn90k
+│   │   ├── shuffle_labels.txt
+│   │   ├── label.txt
+│   │   ├── label.lmdb
+│   │   ├── mnt
+│   ├── SynthText
+│   │   ├── alphanumeric_labels.txt
+│   │   ├── shuffle_labels.txt
+│   │   ├── instances_train.txt
+│   │   ├── label.txt
+│   │   ├── label.lmdb
+│   │   ├── synthtext
 ```
+
+
 ## Pretrained Models
 
 Get the pretrained models from [BaiduNetdisk(passwd:d6jd)](https://pan.baidu.com/s/1s0oNmd5jQJCvoH1efjfBdg), [GoogleDrive](https://drive.google.com/drive/folders/1PTPFjDdx2Ky0KsZdgn0p9x5fqyrdxKWF?usp=sharing). 
 (We both offer training log and result.csv in same file.)
-The pretrained model should set in `models/reconstruct_CDistNetv3_3_10`
-
-Performances of the pretrained models are summaried as follows:
-
-[comment]: <> (|Model|GPUs|IC13|SVT|IIIT|IC15|SVTP|CUTE|AVG|)
-
-[comment]: <> (|-|-|-|-|-|-|-|-|-|)
-
-[comment]: <> (|CDistNet&#40;paper&#41;|6|97.67|93.82|96.57|86.25|89.77|89.58|92.28|)
-
-[comment]: <> (|CDistNet&#40;rebuild&#41;|4|97.43|93.51|96.37|86.03|88.68|93.4|92.57|)
 
 ## Train
+Please refer to the training configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/training.md)
+
 `CUDA_VISIBLE_DEVICES=0,1,2,3 python train.py --config=configs/CDistNet_config.py`
+
 ## Eval
+Please refer to the testing configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/testing.md)
+
 `CUDA_VISIBLE_DEVICES=0 python eval.py --config=configs/CDistNet_config.py`
+
+
+## Acknowledgement
+
+This code is based on [MMOCR](https://github.com/open-mmlab/mmocr) MMOCR is an open-source project that is contributed by researchers and engineers from various colleges and companies. 
+
+## License
+
+This project is released under the [Apache 2.0 license](LICENSE).
+
 ## Citation
 ```bash 
 @article{Zheng2021CDistNetPM,
@@ -83,24 +83,4 @@ Performances of the pretrained models are summaried as follows:
   volume={abs/2111.11011}
 }
 ```
-
-
-
-
-
-## Installation
-
-Please refer to our [Install Guide](https://mmocr.readthedocs.io/en/latest/install.html).
-
-## Get Started
-
-Please see [Getting Started](https://mmocr.readthedocs.io/en/latest/getting_started.html) for the basic usage of MMOCR.
-
-## Acknowledgement
-
-This code is based on [MMOCR](https://github.com/open-mmlab/mmocr) MMOCR is an open-source project that is contributed by researchers and engineers from various colleges and companies. 
-
-## License
-
-This project is released under the [Apache 2.0 license](LICENSE).
 
