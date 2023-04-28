@@ -47,17 +47,17 @@ Get the pretrained models from [BaiduNetdisk(passwd:d6jd)](https://pan.baidu.com
 ## Train
 Please refer to the training configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/training.md)
 ### CRNN+TPS++
-[CRNN] [CRNN_TPS++]
+Download [CRNN] in `mmocr_ijcai/crnn/crnn_latest.pth`
 ```
-PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps.py /share_io03_ssd/ckpt2/ztl/ijcaiv2_crnn_tps_pp 4 
-          --seed=123456 --load-from=../../../ckpt/ztl/reg/mmocr_ijcai/crnn/latest.pth
+PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps++.py ./ckpt/ijcai_crnn_tps_pp 4 
+          --seed=123456 --load-from=mmocr_ijcai/crnn/crnn_latest.pth
 ```
 ### NRTR+TPS++
 
-Download [CRNN] in `mmocr_ijcai/nrtr/nrtr_latest.pth`
+Download [NRTR] in `mmocr_ijcai/nrtr/nrtr_latest.pth`
 
 ```
-PORT=1338 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py /share_io03_ssd/ckpt2/ztl/ijcaiv2_nrtr_tps_exp2 4 
+PORT=1234 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py ./ckpt/ijcai_nrtr_tps_pp 4 
           --seed=123456 --load-from=mmocr_ijcai/nrtr/nrtr_latest.pth
 ```
 
