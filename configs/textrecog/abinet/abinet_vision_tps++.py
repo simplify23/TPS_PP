@@ -28,8 +28,8 @@ model = dict(
     # backbone=dict(type='ResNetABI'),
     backbone=dict(type='ResNetABI_v2_large',
                   in_channels=3,
-                  strides=[1, 2, 2, 1, 2], ),
-    tpsnet=dict(type='TPS_PP'),
+                  strides=[1, 2, 2, 1, 1], ),
+    # tpsnet=dict(type='TPS_PP'),
     encoder=dict(
         type='ABIVisionModel',
         encoder=dict(
@@ -60,8 +60,8 @@ model = dict(
     iter_size=1)
 
 data = dict(
-    samples_per_gpu=80,
-    workers_per_gpu=12,
+    samples_per_gpu=250,
+    workers_per_gpu=10,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),
     train=dict(
