@@ -1,149 +1,75 @@
-<div align="center">
-  <img src="resources/mmocr-logo.png" width="500px"/>
-</div>
+# TPS++: Attention-Enhanced Thin-Plate Spline for Scene Text Recognition
+![1682662695807](https://user-images.githubusercontent.com/39580716/235069522-7e7c5013-9782-4b46-b757-0472df4c56b2.png)
 
-## Introduction
+The official code of TPS_PP (IJCAI 2023)
 
-English | [简体中文](README_zh-CN.md)
+TPS++, an attention-enhanced TPS transformation that incorporates the attention mechanism to text rectification for the first time.  TPS++ builds a more flexible content-aware rectifier, generating a natural text correction that is easier to read by the subsequent recognizer. This code is based on MMOCR 0.4.0 ( [Documentation](https://mmocr.readthedocs.io/en/latest/) ) with **PyTorch 1.6+**.
 
-[![build](https://github.com/open-mmlab/mmocr/workflows/build/badge.svg)](https://github.com/open-mmlab/mmocr/actions)
-[![docs](https://readthedocs.org/projects/mmocr/badge/?version=latest)](https://mmocr.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/open-mmlab/mmocr/branch/main/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmocr)
-[![license](https://img.shields.io/github/license/open-mmlab/mmocr.svg)](https://github.com/open-mmlab/mmocr/blob/main/LICENSE)
-[![PyPI](https://badge.fury.io/py/mmocr.svg)](https://pypi.org/project/mmocr/)
-[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmocr.svg)](https://github.com/open-mmlab/mmocr/issues)
-[![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmocr.svg)](https://github.com/open-mmlab/mmocr/issues)
+## To Do List
+* [x] CRNN + TPS_PP
+* [x] NRTR + TPS_PP
+* [ ] ABINet-LV + TPS
 
-MMOCR is an open-source toolbox based on PyTorch and mmdetection for text detection, text recognition, and the corresponding downstream tasks including key information extraction. It is part of the [OpenMMLab](https://openmmlab.com/) project.
 
-The main branch works with **PyTorch 1.6+**.
+## Installation
 
-Documentation: https://mmocr.readthedocs.io/en/latest/.
+Please refer to [Install Guide](https://github.com/simplify23/TPS_PP/blob/main/docs/en/install.md).
 
-<div align="left">
-  <img src="resources/illustration.jpg"/>
-</div>
+## Get Started
 
-### Major Features
+Please see [Getting Started](https://github.com/simplify23/TPS_PP/blob/main/docs/en/getting_started.md) for the basic usage of MMOCR 0.4.0.
 
-- **Comprehensive Pipeline**
+## Datasets
+The specific configuration of the dataset for training and testing can be found here [Dataset Document](https://github.com/simplify23/TPS_PP/blob/main/docs/en/datasets/recog.md)
+```
+testing 
+├── mixture
+│   ├── icdar_2013
+│   ├── icdar_2015
+│   ├── III5K
+│   ├── ct80
+│   ├── svt
+│   ├── svtp
 
-   The toolbox supports not only text detection and text recognition, but also their downstream tasks such as key information extraction.
+training
+├── mixture
+│   ├── Syn90k
+│   ├── SynthText
+```
 
-- **Multiple Models**
 
-  The toolbox supports a wide variety of state-of-the-art models for text detection, text recognition and key information extraction.
+## Pretrained Models
 
-- **Modular Design**
+Get the pretrained models from [BaiduNetdisk(passwd:d6jd)](https://pan.baidu.com/s/1s0oNmd5jQJCvoH1efjfBdg), [GoogleDrive](https://drive.google.com/drive/folders/1PTPFjDdx2Ky0KsZdgn0p9x5fqyrdxKWF?usp=sharing). 
+(We both offer training log and result.csv in same file.)
 
-  The modular design of MMOCR enables users to define their own optimizers, data preprocessors, and model components such as backbones, necks and heads as well as losses. Please refer to [Getting Started](https://mmocr.readthedocs.io/en/latest/getting_started.html) for how to construct a customized model.
+## Train
+Please refer to the training configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/training.md)
+### CRNN+TPS++
+Download [CRNN] in `mmocr_ijcai/crnn/crnn_latest.pth`
+```
+PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps++.py ./ckpt/ijcai_crnn_tps_pp 4 
+          --seed=123456 --load-from=mmocr_ijcai/crnn/crnn_latest.pth
+```
+### NRTR+TPS++
 
-- **Numerous Utilities**
+Download [NRTR] in `mmocr_ijcai/nrtr/nrtr_latest.pth`
 
-  The toolbox provides a comprehensive set of utilities which can help users assess the performance of models. It includes visualizers which allow visualization of images, ground truths as well as predicted bounding boxes, and a validation tool for evaluating checkpoints during training.  It also includes data converters to demonstrate how to convert your own data to the annotation files which the toolbox supports.
+```
+PORT=1234 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py ./ckpt/ijcai_nrtr_tps_pp 4 
+          --seed=123456 --load-from=mmocr_ijcai/nrtr/nrtr_latest.pth
+```
 
-## [Model Zoo](https://mmocr.readthedocs.io/en/latest/modelzoo.html)
+## Testing
+Please refer to the testing configuration [Testing Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/testing.md)
 
-Supported algorithms:
 
-<details open>
-<summary>Text Detection</summary>
 
-- [x] [DBNet](configs/textdet/dbnet/README.md) (AAAI'2020)
-- [x] [Mask R-CNN](configs/textdet/maskrcnn/README.md) (ICCV'2017)
-- [x] [PANet](configs/textdet/panet/README.md) (ICCV'2019)
-- [x] [PSENet](configs/textdet/psenet/README.md) (CVPR'2019)
-- [x] [TextSnake](configs/textdet/textsnake/README.md) (ECCV'2018)
-- [x] [DRRG](configs/textdet/drrg/README.md) (CVPR'2020)
-- [x] [FCENet](configs/textdet/fcenet/README.md) (CVPR'2021)
+## Acknowledgement
 
-</details>
-
-<details open>
-<summary>Text Recognition</summary>
-
-- [x] [ABINet](configs/textrecog/abinet/README.md) (CVPR'2021)
-- [x] [CRNN](configs/textrecog/crnn/README.md) (TPAMI'2016)
-- [x] [NRTR](configs/textrecog/nrtr/README.md) (ICDAR'2019)
-- [x] [RobustScanner](configs/textrecog/robust_scanner/README.md) (ECCV'2020)
-- [x] [SAR](configs/textrecog/sar/README.md) (AAAI'2019)
-- [x] [SATRN](configs/textrecog/satrn/README.md) (CVPR'2020 Workshop on Text and Documents in the Deep Learning Era)
-- [x] [SegOCR](configs/textrecog/seg/README.md) (Manuscript'2021)
-
-</details>
-
-<details open>
-<summary>Key Information Extraction</summary>
-
-- [x] [SDMG-R](configs/kie/sdmgr/README.md) (ArXiv'2021)
-
-</details>
-
-<details open>
-<summary>Named Entity Recognition</summary>
-
-- [x] [Bert-Softmax](configs/ner/bert_softmax/README.md) (NAACL'2019)
-
-</details>
-
-Please refer to [model_zoo](https://mmocr.readthedocs.io/en/latest/modelzoo.html) for more details.
+This code is based on [MMOCR](https://github.com/open-mmlab/mmocr)  
 
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
 
-## Citation
-
-If you find this project useful in your research, please consider cite:
-
-```bibtex
-@article{mmocr2021,
-    title={MMOCR:  A Comprehensive Toolbox for Text Detection, Recognition and Understanding},
-    author={Kuang, Zhanghui and Sun, Hongbin and Li, Zhizhong and Yue, Xiaoyu and Lin, Tsui Hin and Chen, Jianyong and Wei, Huaqiang and Zhu, Yiqin and Gao, Tong and Zhang, Wenwei and Chen, Kai and Zhang, Wayne and Lin, Dahua},
-    journal= {arXiv preprint arXiv:2108.06543},
-    year={2021}
-}
-```
-
-## Changelog
-
-v0.4.0 was released in 2021-12-15.
-
-
-## Installation
-
-Please refer to our [Install Guide](https://mmocr.readthedocs.io/en/latest/install.html).
-
-## Get Started
-
-Please see [Getting Started](https://mmocr.readthedocs.io/en/latest/getting_started.html) for the basic usage of MMOCR.
-
-## Contributing
-
-We appreciate all contributions to improve MMOCR. Please refer to [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the contributing guidelines.
-
-## Acknowledgement
-
-MMOCR is an open-source project that is contributed by researchers and engineers from various colleges and companies. We appreciate all the contributors who implement their methods or add new features, as well as users who give valuable feedbacks.
-We hope the toolbox and benchmark could serve the growing research community by providing a flexible toolkit to reimplement existing methods and develop their own new OCR methods.
-
-## Projects in OpenMMLab
-
-- [MMCV](https://github.com/open-mmlab/mmcv): OpenMMLab foundational library for computer vision.
-- [MIM](https://github.com/open-mmlab/mim): MIM Installs OpenMMLab Packages.
-- [MMClassification](https://github.com/open-mmlab/mmclassification): OpenMMLab image classification toolbox and benchmark.
-- [MMDetection](https://github.com/open-mmlab/mmdetection): OpenMMLab detection toolbox and benchmark.
-- [MMDetection3D](https://github.com/open-mmlab/mmdetection3d): OpenMMLab's next-generation platform for general 3D object detection.
-- [MMSegmentation](https://github.com/open-mmlab/mmsegmentation): OpenMMLab semantic segmentation toolbox and benchmark.
-- [MMAction2](https://github.com/open-mmlab/mmaction2): OpenMMLab's next-generation action understanding toolbox and benchmark.
-- [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab's pose estimation toolbox and benchmark.
-- [MMTracking](https://github.com/open-mmlab/mmtracking): OpenMMLab video perception toolbox and benchmark.
-- [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image editing toolbox and benchmark.
-- [MMOCR](https://github.com/open-mmlab/mmocr): A Comprehensive Toolbox for Text Detection, Recognition and Understanding.
-- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
-- [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
-- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab FewShot Learning Toolbox and Benchmark.
-- [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab Human Pose and Shape Estimation Toolbox and Benchmark.
-- [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab self-supervised learning Toolbox and Benchmark.
-- [MMRazor](https://github.com/open-mmlab/mmrazor): OpenMMLab Model Compression Toolbox and Benchmark.
-- [MMDeploy](https://github.com/open-mmlab/mmdeploy): OpenMMLab Model Deployment Framework.
