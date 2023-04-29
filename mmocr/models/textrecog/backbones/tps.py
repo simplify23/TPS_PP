@@ -946,7 +946,7 @@ class U_TPSnet_v3(BaseModule):
         self.heads = 16
         pc_ratio = 1
         ic_ratio = 1
-        self.type = "ResNet45"
+        self.type = "ResNet45v2"
 
         self.visual_point = visual_point
         self.num_fiducial = point_size[0]*point_size[1]
@@ -968,7 +968,7 @@ class U_TPSnet_v3(BaseModule):
                             nn.Linear(self.point_channel,32),
                             nn.Linear(32, 64 * 2),
         )
-        self.down_feat = ConvModule(self.img_channel*3, self.img_channel, kernel_size=1, stride=1,)
+        self.down_feat = ConvModule(self.img_channel * 3, self.img_channel, kernel_size=1, stride=1,)
         # # ResNet31:
         if self.type=="ResNet31":
             self.down0 = ConvModule(64,self.img_channel,kernel_size=3, stride=2,padding=1,)
@@ -977,11 +977,17 @@ class U_TPSnet_v3(BaseModule):
             self.up_after = ConvModule(self.img_channel, 256, kernel_size=1, stride=1)
 
         #ResNet45:
-        if self.type=='ResNet45':
-            self.down0 = ConvModule(32, self.img_channel, kernel_size=3, stride=2, padding=1, )
+        if self.type=='ResNet45v2':
+            self.down0 = ConvModule(32, self.img_channel, kernel_size=1, stride=1 )
             self.down1 = ConvModule(32, self.img_channel, kernel_size=1, stride=1 )
             self.down2 = ConvModule(64, self.img_channel, kernel_size=1, stride=1,)
-
+            self.down0_1 = ConvModule(self.img_channel, self.img_channel, kernel_size=3, stride=2, padding=1,)
+            self.down1_1 = ConvModule(self.img_channel, self.img_channel, kernel_size=3, stride=2, padding=1, )
+            self.up_sample = nn.Upsample(
+                size=None,
+                scale_factor=2,
+                mode='nearest',
+                align_corners=None)
 
         # svtr: 64,128,128
         if self.type == 'SVTR':
@@ -1033,6 +1039,206 @@ class U_TPSnet_v3(BaseModule):
             pc_score = torch.zeros_like(pc_score)
         return cc_score, pc_score
 
+    def grid(self,a1,a2,a3):
+        a = torch.cat((a1, a2, self.up_sample(a3)), dim=1)
+        return self.down_feat(a)
+
+
+    def forward(self, batch_img, epoch = 0, outs=None, img=None,**kwargs):
+        """
+        Args:
+            batch_img (Tensor): Images to be rectified with size
+                :math:`(N, C, H, W)`.
+
+        Returns:
+            Tensor: Rectified image with size :math:`(N, C, H_r, W_r)`.
+        """
+        # feat_cat = batch_img
+        # print(outs[1].shape)
+        # print(self.down1)
+        if outs != None:
+            feat0 = self.down0(outs[0])
+            feat1 = self.down1(outs[1])
+            feat2 = self.down2(batch_img)
+            feat_cat = torch.cat((self.down0_1(feat0), self.down1_1(feat1), feat2),dim=1)
+            feat_grid = self.grid(feat0, feat1, feat2)
+            # print("out has {},last is {}\n".format(len(outs),outs[-1].shape))
+            # feat_grid = self.down_feat(outs[-1])
+        else:
+            batch_img = self.down_feat(batch_img)
+
+        # res = batch_img
+        logits = self.Unet(
+            feat_cat)
+        batch_C_prime = logits['point']
+        u_feat = logits['feature']
+        point_feat = logits['point_feat']
+        # print(point_feat.shape)
+
+        if self.visual_point == True:
+            draw_point_map(einops.rearrange(batch_C_prime, 'b (h w) c -> b h w c', h=4, w=16))
+
+        cc_score,pc_score = self.get_score(point_feat,u_feat,epoch)
+        # print(pc_score)
+        build_P_prime = self.GridGenerator_atten.build_P_prime(
+            batch_C_prime, cc_score,pc_score,batch_img.device
+        )
+
+        build_P_prime_reshape = build_P_prime.reshape([
+            build_P_prime.size(0), self.rectified_img_size[0],
+            self.rectified_img_size[1], 2
+        ])
+        if self.visual_point == True:
+            draw_point_map(build_P_prime_reshape)
+
+        batch_rectified_img = F.grid_sample(
+            feat_grid,
+            build_P_prime_reshape,
+            padding_mode='border',
+            align_corners=True)
+        img = F.grid_sample(
+            img,
+            build_P_prime_reshape,
+            padding_mode='border',
+            align_corners=True)
+        # logits = self.cls(point_feat)
+        logits = None
+
+        # resnet31
+        if self.type =='ResNet31':
+            batch_rectified_img = self.up_after(batch_rectified_img)
+
+        result = {
+            'output': batch_rectified_img,
+            'logits': logits,
+            'mp_img': img,
+            'pc_score': pc_score,
+        }
+        return result
+
+@BACKBONES.register_module()
+class U_TPSnet_v4(BaseModule):
+    '''
+    new multi-layers
+    for paper tps_pp final version
+    '''
+    def __init__(self,
+                 num_fiducial=64,
+                 img_size=(16, 64),
+                 rectified_img_size=(16, 64),
+                 num_img_channel=64,
+                 point_size=(2,16),
+                 p_stride=2,
+                 visual_point=False,
+                 init_cfg=None,
+                 ):
+        super().__init__(init_cfg=init_cfg)
+        assert isinstance(num_fiducial, int)
+        assert num_fiducial > 0
+        assert isinstance(img_size, tuple)
+        assert isinstance(rectified_img_size, tuple)
+        assert isinstance(num_img_channel, int)
+
+        self.heads = 16
+        pc_ratio = 1
+        ic_ratio = 1
+        self.type = "ResNet45"
+
+        self.visual_point = visual_point
+        self.num_fiducial = point_size[0]*point_size[1]
+        self.img_size = img_size
+        self.point_size = point_size
+        self.rectified_img_size = rectified_img_size
+        self.num_img_channel = num_img_channel
+        self.point_channel = num_img_channel * pc_ratio
+        self.img_channel = num_img_channel * ic_ratio
+        # self.without_as = False
+        self.without_as = False
+        u_channel = 3
+        if self.type == 'pren':
+            u_channel = 0.5
+
+        self.Unet = UNetwork(self.num_img_channel,self.point_size,p_stride, u_channel = u_channel)
+        self.scale = self.num_img_channel ** -0.5
+        self.p_linear = nn.Sequential(
+                            nn.Linear(self.point_channel,32),
+                            nn.Linear(32, 64 * 2),
+        )
+        self.down_feat = ConvModule(3, self.img_channel, kernel_size=1, stride=1,)
+        # # ResNet31:
+        if self.type=="ResNet31":
+            self.down0 = ConvModule(64,self.img_channel,kernel_size=3, stride=2,padding=1,)
+            self.down1 = ConvModule(128,self.img_channel, kernel_size=3,stride=2,padding=1,)
+            self.down2 = ConvModule(256, self.img_channel, kernel_size=1,stride=1,)
+            self.up_after = ConvModule(self.img_channel, 256, kernel_size=1, stride=1)
+
+        #ResNet45:
+        if self.type=='ResNet45':
+            self.down0 = ConvModule(32, self.img_channel, kernel_size=1, stride=1 )
+            self.down1 = ConvModule(32, self.img_channel, kernel_size=1, stride=1 )
+            self.down2 = ConvModule(64, self.img_channel, kernel_size=1, stride=1,)
+            self.down0_1 = ConvModule(self.img_channel, self.img_channel, kernel_size=3, stride=2, padding=1,)
+            self.up_sample = nn.Upsample(
+                size=None,
+                scale_factor=2,
+                mode='nearest',
+                align_corners=None)
+
+        # svtr: 64,128,128
+        if self.type == 'SVTR':
+            self.down0 = ConvModule(32, self.img_channel, kernel_size=3, stride=2, padding=1,)
+            self.down1 = ConvModule(64, self.img_channel, kernel_size=3, stride=2, padding=1,)
+            self.down2 = ConvModule(64, self.img_channel, kernel_size=1, stride=1,)
+
+        # [b, 24, 32, 128], [b, 24, 32, 128], [b, 32, 4, 16]
+        if self.type == 'pren':
+            self.down0 = ConvModule(24, self.img_channel, kernel_size=3, stride=2, padding=1,)
+            self.down1 = ConvModule(24, self.img_channel, kernel_size=3, stride=2, padding=1,)
+            self.down2 = ConvModule(32, self.img_channel, kernel_size=1, stride=1,)
+            self.down_feat = ConvModule(self.img_channel * 3, self.img_channel//2, kernel_size=1, stride=1, )
+
+        self.feat_linear = nn.Sequential(
+            nn.Linear(self.img_channel, 32),
+            nn.Linear(32, 64 * 2),
+        )
+
+        # self.cls = nn.Sequential(
+        #     nn.Linear(self.img_channel, 256),
+        #     nn.Linear(256, 37),
+        # )
+
+        self.GridGenerator_atten = GridGenerator_Atten(self.rectified_img_size,self.point_size)
+        self.count_param(self.Unet, 'Total_PointNet')
+        # self.load_ckpt(file_path="ckpt/ztl/reg/mmocr/Backbonev15_4_tps_base_10M_tf_2_unet_124_atten_score_PointNet_mulistage_layer2_training_end_to_end/latest.pth",device='cpu')
+
+    def count_param(self, model, name):
+        print("{} have {}M paramerters in total".format(name, sum(x.numel() for x in model.parameters()) / 1e6))
+
+    def atten_score(self, a, b):
+        attn = torch.einsum('b m c, b n c -> b m n', a, b)  # B * h, HW, Ns
+        attn = attn.mul(self.scale)
+        # attn = torch.sigmoid(attn)
+        attn = torch.tanh(attn)
+        # attn = F.softmax(attn, dim=2)
+        return attn
+
+    def get_score(self, point, feat, epoch):
+        feat = rearrange(feat, 'b c h w -> b (h w) c')
+        p1 = self.p_linear(point)
+        f = self.feat_linear(feat)
+        # cc_score =self.atten_score(p1,p2)
+        cc_score = 0.0
+        pc_score = self.atten_score(f, p1)
+        if self.without_as == True:
+        # if epoch <= 5 or self.without_as == True:
+            pc_score = torch.zeros_like(pc_score)
+        return cc_score, pc_score
+
+    def grid(self,a1,a2,a3):
+        a = torch.cat((a1, self.up_sample(a2), self.up_sample(a3)), dim=1)
+        return self.down_feat(a)
+
+
     def forward(self, batch_img, epoch = 0, outs=None, **kwargs):
         """
         Args:
@@ -1049,8 +1255,10 @@ class U_TPSnet_v3(BaseModule):
             feat0 = self.down0(outs[0])
             feat1 = self.down1(outs[1])
             feat2 = self.down2(batch_img)
-            feat_cat = torch.cat((feat0, feat1, feat2),dim=1)
-            # batch_img = self.down_feat(feat_cat)
+            feat_cat = torch.cat((self.down0_1(feat0), feat1, feat2),dim=1)
+            # feat_grid = self.grid(feat0, feat1, feat2)
+            # print("out has {},last is {}\n".format(len(outs),outs[-1].shape))
+            feat_grid = self.down_feat(outs[-1])
         else:
             batch_img = self.down_feat(batch_img)
 
@@ -1078,7 +1286,7 @@ class U_TPSnet_v3(BaseModule):
             draw_point_map(build_P_prime_reshape)
 
         batch_rectified_img = F.grid_sample(
-            batch_img,
+            feat_grid,
             build_P_prime_reshape,
             padding_mode='border',
             align_corners=True)
@@ -1496,6 +1704,7 @@ class GridGenerator_Atten(nn.Module):
         """Generate P_hat and inv_delta_C for later."""
         super().__init__()
         self.eps = 1e-6
+        self.thela = 0.
         self.point_size = point_size
 
         self.point_y = point_size[0]
@@ -1656,8 +1865,7 @@ class GridGenerator_Atten(nn.Module):
         B,n,_ = pc_score.size()
         P = torch.tensor(self.P).float().to(device).unsqueeze(0).repeat(B, 1, 1)
         # pc_score = pc_score * 2
-        thela = 0.5
-        P_hat = P_hat * (pc_score * thela + 1)
+        P_hat = P_hat * (pc_score * self.thela + 1)
         # P_hat = P_hat * (pc_score + 1)
         # P_hat = P_hat * (pc_score * 2 + self.eps)
         P_hat = torch.cat([torch.ones((B, n, 1)).to(device), P, P_hat], dim=2)

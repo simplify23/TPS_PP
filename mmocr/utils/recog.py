@@ -121,7 +121,7 @@ def parse_args():
     parser.add_argument(
         '--recog',
         type=str,
-        default='SEG',
+        default='TPS++',
         help='Pretrained text recognition algorithm')
     parser.add_argument(
         '--recog-config',
@@ -234,7 +234,7 @@ class MMOCR:
                  det='PANet_IC15',
                  det_config='',
                  det_ckpt='',
-                 recog='SEG',
+                 recog='TPS++',
                  recog_config='',
                  recog_ckpt='',
                  kie='',
@@ -295,10 +295,10 @@ class MMOCR:
                 'ckpt': 'tps/crnn_tps_academic_dataset_20210510-d221a905.pth'
             },
             'TPS++': {
-                'config': 'tps/trans_tps++.py',
-                'ckpt': 'ckpt/ztl/reg/mmocr/Backbone_v17_utps_ctc_loss_samha_without_3_ResNet50/latest.pth',
+                'config': 'crnn/crnn_tps.py',
+                # 'ckpt': 'ckpt/ztl/reg/mmocr/Backbone_v17_utps_ctc_loss_samha_without_3_ResNet50/latest.pth',
                 # 'ckpt': 'ckpt/ztl/reg/mmocr/Backbonev16_v4_resnet50_re_again_with_utps/epoch_12.pth',
-                'ckpt': 'ckpt/ztl/reg/mmocr/Backbone_v17_utps_ce_loss_ResNet50/latest.pth',
+                'ckpt': '../../../ckpt/ztl/reg/mmocr_ijcai/crnn_tps_pp_all_augv5_3_baseline_loss_0_2_alpha/latest.pth',
             },
             'TPS': {
                 'config': 'tps/trans_tps.py',
@@ -468,9 +468,12 @@ class MMOCR:
     def image_pp(self, result, model):
         i = 0
         show = True
+        print("start testing!")
         for arr,img, output, export, res, kpoint, featmp, originmp in zip(self.args.arrays, self.args.filenames, self.args.output,
                                             self.args.export, result, self.grid_kp_list, self.grid_mp_list, self.origin_mp_list):
             img_path = self.args.img+"/"+img+".jpg"
+            img_path = self.args.img
+            print(img_path)
             # img = Image.open(img_path, mode='r')
             # crop_img = img.resize([128,32])
             img = cv2.imread(img_path)  # 读取图片

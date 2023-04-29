@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="ztl@10.200.3.80:22 password" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
       <paths name="134服务器">
         <serverdata>
@@ -9,17 +9,24 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="zhengtianlun@bigvid">
+      <paths name="80服务器">
         <serverdata>
           <mappings>
-            <mapping deploy="/mmocr" local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="ztl@10.200.3.80:22 password">
+      <paths name="bigvid">
         <serverdata>
           <mappings>
-            <mapping deploy="/mmocr" local="$PROJECT_DIR$" />
+            <mapping deploy="/share/home/ztl/mmocr" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhengtl@10.200.5.134:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zhengtl/mmocr" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

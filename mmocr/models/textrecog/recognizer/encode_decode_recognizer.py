@@ -123,7 +123,7 @@ class EncodeDecodeRecognizer(BaseRecognizer):
 
     def tps_img(self, img, test, **kwargs):
         x = self.backbone(img, self.tpsnet, test)
-        if self.kd_loss == True:
+        if self.kd_loss == True and test == False:
             o_img = self.backbone_o.return_feature(kwargs.get('img_origin'), None, test)
             x['img_o'] = o_img
         return x
@@ -175,8 +175,9 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             img_metas,
         )
         losses = self.loss(*loss_inputs)
-        if self.kd_loss == True:
-           losses['loss_kd'] = kd_loss
+        # (1/(self.epoch + 1))
+        # if self.kd_loss == True:
+        #    losses['loss_kd'] = kd_loss * 0.5
 
         return losses
 
@@ -195,6 +196,8 @@ class EncodeDecodeRecognizer(BaseRecognizer):
             img_meta['valid_ratio'] = valid_ratio
 
         feat = self.extract_feat(img,test = True)
+        if len(feat) != 1:
+            feat = feat['output']
 
         out_enc = None
         if self.encoder is not None:

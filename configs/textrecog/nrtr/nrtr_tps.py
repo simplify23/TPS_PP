@@ -8,7 +8,7 @@
 _base_ = [
     '../../_base_/default_runtime.py',
     '../../_base_/schedules/schedule_adam_step_12e.py',
-    '../../_base_/recog_pipelines/abinet_pipeline.py',
+    '../../_base_/recog_pipelines/crnn_pp_pipeline.py',
     '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
     '../../_base_/recog_datasets/academic_test_high.py'
 ]
