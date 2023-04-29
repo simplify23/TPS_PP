@@ -26,7 +26,7 @@ label_convertor = dict(
 model = dict(
     type='ABINet',
     backbone=dict(type='ResNetABI'),
-    # tpsnet=dict(type='U_TPSnet_v3'),
+    tpsnet=dict(type='TPS_PP'),
     encoder=dict(
         type='ABIVisionModel',
         encoder=dict(

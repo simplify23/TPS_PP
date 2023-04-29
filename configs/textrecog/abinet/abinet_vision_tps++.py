@@ -1,9 +1,9 @@
 _base_ = [
     '../../_base_/default_runtime.py',
-    '../../_base_/schedules/schedule_adam_step_12e.py',
-    '../../_base_/recog_pipelines/pren_pipeline.py',
+    '../../_base_/schedules/schedule_adam_step_15e.py',
+    '../../_base_/recog_pipelines/abinet_pipeline.py',
     '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
-    '../../_base_/recog_datasets/academic_test_low.py'
+    '../../_base_/recog_datasets/academic_test_high.py'
 ]
 
 train_list = {{_base_.train_list}}
@@ -15,7 +15,6 @@ find_unused_parameters = True
 # Model
 num_chars = 37
 max_seq_len = 26
-channel = 384
 label_convertor = dict(
     type='ABIConvertor',
     dict_type='DICT36',
@@ -27,22 +26,27 @@ label_convertor = dict(
 model = dict(
     type='ABINet',
     # backbone=dict(type='ResNetABI'),
-    backbone = dict(type='efficientnet'),
-    # tpsnet=dict(type='U_TPSnet_v3',),
+    backbone=dict(type='ResNetABI_v2_large',
+                  in_channels=3,
+                  strides=[1, 2, 2, 1, 2], ),
+    tpsnet=dict(type='TPS_PP'),
     encoder=dict(
         type='ABIVisionModel',
         encoder=dict(
             type='TransformerEncoder',
-            n_layers=2,
+            n_layers=3,
             n_head=8,
-            d_model=channel,
-            d_inner=channel*2,
+            d_model=512,
+            d_inner=2048,
             dropout=0.1,
             max_len=8 * 32,
         ),
         decoder=dict(
-            type='CommonVisionDecoder',
-            in_channels=channel,
+            type='ABIVisionDecoder',
+            in_channels=512,
+            num_channels=64,
+            attn_height=8,
+            attn_width=32,
             attn_mode='nearest',
             use_result='feature',
             num_chars=num_chars,
@@ -56,7 +60,7 @@ model = dict(
     iter_size=1)
 
 data = dict(
-    samples_per_gpu=300,
+    samples_per_gpu=80,
     workers_per_gpu=12,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),
