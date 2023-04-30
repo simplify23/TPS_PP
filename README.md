@@ -46,21 +46,13 @@ checkpoint model in `model/xxx/latest.pth`, pre-train model in `pre_train/xxx/la
 |        Methods       	           |        IIIT5K       	| SVT       	| IC13        	| IC15      	| SVTP      	| CUTE      	| AVG
 |:------------------:              |:------------------:	|:---------:	|:------:   	|:---------:	|:---------:	|:---------:	|:---------:
 |       NRTR + TPS_PP      	           |         96.3           |    94.6   	|    96.6   	|    85.7   	|    89.0       |    92.4       | 92.4
-|       NRTR + TPS_PP *      | 	     95.6          |    95.1 	    |    97.2   	|    85.9   	|   89.8       |    90.28       | 92.3
+|       NRTR + TPS_PP *      | 	     95.6          |    95.1 	    |    97.2   	|    85.9   	|   89.8       |    90.3       | 92.3
 
 First, the model needs to be pre-trained using without TPS_PP (pre-train), and then trained end-to-end with a network that incorporates TPS_PP (checkpoint). * denotes the performance of the implemented code. checkpoint model in `model/xxx/latest.pth`, pre-train model in `pre_train/xxx/latest.pth`.
 
 ## Train
 Please refer to the training configuration [Training Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/training.md)
-### CRNN+TPS++
-Step 1 : Download [CRNN](https://pan.baidu.com/s/1qdFBhC-6Ahb6EID5UGyMiQ?pwd=cd9r) `pre_train/crnn/latest.pth` in `mmocr_ijcai/crnn/latest.pth`
 
-
-```
-#Step 2
-PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps++.py ./ckpt/ijcai_crnn_tps_pp 4 
-          --seed=123456 --load-from=mmocr_ijcai/crnn/latest.pth
-```
 ### NRTR+TPS++
 
 Setp 1 : Download [NRTR](https://pan.baidu.com/s/1qdFBhC-6Ahb6EID5UGyMiQ?pwd=cd9r) `pre_train/nrtr/latest.pth` in `mmocr_ijcai/nrtr/latest.pth`
@@ -70,6 +62,16 @@ Setp 1 : Download [NRTR](https://pan.baidu.com/s/1qdFBhC-6Ahb6EID5UGyMiQ?pwd=cd9
 #Step 2
 PORT=1234 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py ./ckpt/ijcai_nrtr_tps_pp 4 
           --seed=123456 --load-from=mmocr_ijcai/nrtr/nrtr_latest.pth
+```
+
+### CRNN+TPS++
+Step 1 : Download [CRNN](https://pan.baidu.com/s/1qdFBhC-6Ahb6EID5UGyMiQ?pwd=cd9r) `pre_train/crnn/latest.pth` in `mmocr_ijcai/crnn/latest.pth`
+
+
+```
+#Step 2
+PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps++.py ./ckpt/ijcai_crnn_tps_pp 4 
+          --seed=123456 --load-from=mmocr_ijcai/crnn/latest.pth
 ```
 
 ## Testing
