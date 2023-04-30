@@ -295,7 +295,7 @@ class MMOCR:
                 'ckpt': 'tps/crnn_tps_academic_dataset_20210510-d221a905.pth'
             },
             'TPS++': {
-                'config': 'crnn/crnn_tps.py',
+                'config': 'crnn/crnn_tps++.py',
                 # 'ckpt': 'ckpt/ztl/reg/mmocr/Backbone_v17_utps_ctc_loss_samha_without_3_ResNet50/latest.pth',
                 # 'ckpt': 'ckpt/ztl/reg/mmocr/Backbonev16_v4_resnet50_re_again_with_utps/epoch_12.pth',
                 'ckpt': '../../../ckpt/ztl/reg/mmocr_ijcai/crnn_tps_pp_all_augv5_3_baseline_loss_0_2_alpha/latest.pth',

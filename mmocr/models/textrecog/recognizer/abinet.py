@@ -109,6 +109,8 @@ class ABINet(EncodeDecodeRecognizer):
             img_meta['valid_ratio'] = valid_ratio
 
         feat = self.extract_feat(img,test=False)
+        if len(feat) != 1:
+            feat = feat['output']
 
         gt_labels = [img_meta['text'] for img_meta in img_metas]
 
@@ -159,6 +161,8 @@ class ABINet(EncodeDecodeRecognizer):
             img_meta['valid_ratio'] = valid_ratio
 
         feat = self.extract_feat(img,test=True)
+        if len(feat) != 1:
+            feat = feat['output']
 
         text_logits = None
         out_enc = None

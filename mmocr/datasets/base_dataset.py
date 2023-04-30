@@ -104,8 +104,8 @@ class BaseDataset(Dataset):
         results = dict(img_info=img_info)
         self.pre_pipeline(results)
         output = self.pipeline(results)
-        if self.kd_loss== True and self.test_mode== False:
-            output['img_origin']=self.kd_pipeline(results)['img']
+        # if self.kd_loss== True and self.test_mode== False:
+        #     output['img_origin']=self.kd_pipeline(results)['img']
         return output
 
 

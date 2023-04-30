@@ -519,7 +519,7 @@ class TPS_PP(BaseModule):
         self.heads = 16
         pc_ratio = 1
         ic_ratio = 1
-        self.type = "ResNet45"
+        self.type = "ResNet45v2"
 
         self.visual_point = visual_point
         self.num_fiducial = point_size[0]*point_size[1]

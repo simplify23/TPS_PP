@@ -193,4 +193,4 @@ class ResNetABI_v2_large(BaseModule):
             outs.append(x)
             x = res_layer(x)
 
-        return {'output': x, 'img_ref' : outputs.get('output', None)}
+        return {'output': x, 'img_ref' : outputs.get('output', None) if outputs !=None else None}
