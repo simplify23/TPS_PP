@@ -9,10 +9,17 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="zhengtianlun@bigvid">
+      <paths name="80服务器">
         <serverdata>
           <mappings>
-            <mapping deploy="/mmocr" local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bigvid">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/share/home/ztl/mmocr" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

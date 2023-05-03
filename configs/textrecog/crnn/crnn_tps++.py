@@ -17,7 +17,7 @@ train_list = {{_base_.train_list}}
 test_list = {{_base_.test_list}}
 train_pipeline = {{_base_.train_pipeline}}
 test_pipeline = {{_base_.test_pipeline}}
-find_unused_parameters = True
+# find_unused_parameters = True
 kd_loss = False
 runner = dict(type='RunnerWrapper', max_epochs=12)
 # model
@@ -29,27 +29,18 @@ model = dict(
     kd_loss = kd_loss,
     # preprocessor=dict(
     #     type='TPS_PPv2',),
-    # preprocessor=dict(
-    #     type='TPSPreprocessor',
-    #     num_fiducial=20,
-    #     img_size=(32, 128),
-    #     rectified_img_size=(32, 128),
-    #     num_img_channel=3),
+    preprocessor=dict(
+        type='TPSPreprocessor',
+        num_fiducial=20,
+        img_size=(32, 128),
+        rectified_img_size=(32, 128),
+        num_img_channel=3),
     # backbone=dict(type='VeryDeepVgg', leaky_relu=False, input_channels=1),
     backbone=dict(type='ResNetABI_v2_large',
                   in_channels = 3,
                   strides=[1, 2, 2, 1, 2],),
-    # tpsnet=dict(type='U_TPSnet_Warp'),
+    # tpsnet=dict(type='TPS_PP'),
     encoder=None,
-    # encoder=dict(
-    #     type='UTransformerEncoder',
-    #     n_layers=2,
-    #     n_head=8,
-    #     d_model=512,
-    #     d_inner=1024,
-    #     dropout=0.1,
-    #     max_len=8 * 32,
-    # ),
     decoder=dict(type='CRNNDecoder', in_channels=512, rnn_flag=True),
     # decoder=None,
     loss=dict(type='CTCLoss'),

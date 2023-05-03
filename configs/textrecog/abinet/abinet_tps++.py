@@ -1,6 +1,6 @@
 _base_ = [
     '../../_base_/default_runtime.py',
-    '../../_base_/schedules/schedule_adam_step_15e.py',
+    '../../_base_/schedules/schedule_adam_step_12e.py',
     '../../_base_/recog_pipelines/abinet_pipeline.py',
     '../../_base_/recog_models/abinet_ac.py',
     '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
@@ -15,7 +15,7 @@ runner = dict(type='RunnerWrapper', max_epochs=15)
 find_unused_parameters = True
 data = dict(
     samples_per_gpu=64,
-    workers_per_gpu=8,
+    workers_per_gpu=10,
     pin_memory=True,
     val_dataloader=dict(samples_per_gpu=10),
     test_dataloader=dict(samples_per_gpu=1),
