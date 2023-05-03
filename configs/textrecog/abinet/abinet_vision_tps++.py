@@ -1,6 +1,6 @@
 _base_ = [
     '../../_base_/default_runtime.py',
-    '../../_base_/schedules/schedule_adam_step_15e.py',
+    '../../_base_/schedules/schedule_adam_step_12e.py',
     '../../_base_/recog_pipelines/abinet_pipeline.py',
     '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
     '../../_base_/recog_datasets/academic_test_high.py'
@@ -26,6 +26,12 @@ label_convertor = dict(
 model = dict(
     type='ABINet',
     # backbone=dict(type='ResNetABI'),
+    preprocessor=dict(
+        type='TPSPreprocessor',
+        num_fiducial=20,
+        img_size=(32, 128),
+        rectified_img_size=(32, 128),
+        num_img_channel=3),
     backbone=dict(type='ResNetABI_v2_large',
                   in_channels=3,
                   strides=[1, 2, 2, 1, 1], ),

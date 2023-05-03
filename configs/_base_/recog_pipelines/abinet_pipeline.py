@@ -15,36 +15,36 @@ train_pipeline = [
             dict(
                 type='OneOfWrapper',
                 transforms=[
-                    # dict(
-                    #     type='RandomRotateTextDet',
-                    #     max_angle=15,
-                    # ),
                     dict(
-                        type='Distort',
-                        # max_angle=15,
-                    ),
-                    dict(
-                        type='Stretch',
-                        # max_angle=15,
-                    ),
-                    dict(
-                        type='Curve',
-                        # max_angle=15,
+                        type='RandomRotateTextDet',
+                        max_angle=15,
                     ),
                     # dict(
-                    #     type='TorchVisionWrapper',
-                    #     op='RandomAffine',
-                    #     degrees=15,
-                    #     translate=(0.3, 0.3),
-                    #     scale=(0.5, 2.),
-                    #     shear=(-45, 45),
+                    #     type='Distort',
+                    #     # max_angle=15,
                     # ),
                     # dict(
-                    #     type='TorchVisionWrapper',
-                    #     op='RandomPerspective',
-                    #     distortion_scale=0.5,
-                    #     p=1,
+                    #     type='Stretch',
+                    #     # max_angle=15,
                     # ),
+                    # dict(
+                    #     type='Curve',
+                    #     # max_angle=15,
+                    # ),
+                    dict(
+                        type='TorchVisionWrapper',
+                        op='RandomAffine',
+                        degrees=15,
+                        translate=(0.3, 0.3),
+                        scale=(0.5, 2.),
+                        shear=(-45, 45),
+                    ),
+                    dict(
+                        type='TorchVisionWrapper',
+                        op='RandomPerspective',
+                        distortion_scale=0.5,
+                        p=1,
+                    ),
                 ])
         ],
     ),
