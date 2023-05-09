@@ -5,7 +5,7 @@ The official code of TPS_PP (IJCAI 2023)
 
 TPS++, an attention-enhanced TPS transformation that incorporates the attention mechanism to text rectification for the first time.  TPS++ builds a more flexible content-aware rectifier, generating a natural text correction that is easier to read by the subsequent recognizer. This code is based on MMOCR 0.4.0 ( [Documentation](https://mmocr.readthedocs.io/en/latest/) ) with **PyTorch 1.6+**.
 
-## To Do List
+## Code List
 * [x] NRTR + TPS_PP
 * [ ] CRNN + TPS_PP
 * [ ] ABINet-LV + TPS_PP
@@ -64,15 +64,16 @@ PORT=1234 ./tools/dist_train.sh configs/textrecog/nrtr/nrtr_tps++.py ./ckpt/ijca
           --seed=123456 --load-from=mmocr_ijcai/nrtr/nrtr_latest.pth
 ```
 
-### CRNN+TPS++
+<!-- ### CRNN+TPS++
 Step 1 : Download [CRNN](https://pan.baidu.com/s/1qdFBhC-6Ahb6EID5UGyMiQ?pwd=cd9r) `pre_train/crnn/latest.pth` in `mmocr_ijcai/crnn/latest.pth`
 
+Step 2
 
 ```
-#Step 2
+
 PORT=1234 ./tools/dist_train.sh configs/textrecog/crnn/crnn_tps++.py ./ckpt/ijcai_crnn_tps_pp 4 
           --seed=123456 --load-from=mmocr_ijcai/crnn/latest.pth
-```
+``` -->
 
 ## Testing
 Please refer to the testing configuration [Testing Doc](https://github.com/simplify23/TPS_PP/blob/main/docs/en/testing.md)
