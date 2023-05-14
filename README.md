@@ -84,6 +84,17 @@ Please refer to the testing configuration [Testing Doc](https://github.com/simpl
 
 This code is based on [MMOCR](https://github.com/open-mmlab/mmocr)  
 
+## Citation
+If you find our method useful for your reserach, please cite
+```bash 
+@article{zheng2023tps++,
+  title={TPS++: Attention-Enhanced Thin-Plate Spline for Scene Text Recognition},
+  author={Zheng, Tianlun and Chen, Zhineng and Bai, Jinfeng and Xie, Hongtao and Jiang, Yu-Gang},
+  journal={IJCAI},
+  year={2023}
+}
+ ```
+
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
